@@ -1,1 +1,0 @@
-## [proposal link - google slides](https://docs.google.com/presentation/d/1f7vIWsAuLS8y2HbqNljs-L6CMxyqrP57Pbx0BFo3Sb0/edit?usp=sharing)
