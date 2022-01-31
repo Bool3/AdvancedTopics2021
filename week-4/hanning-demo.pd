@@ -1,0 +1,130 @@
+#N canvas 550 50 937 677 12;
+#N canvas 56 478 137 245 magnitude~ 0;
+#X obj 19 17 inlet~ signal;
+#X obj 34 193 outlet~;
+#X obj 37 53 rfft~;
+#X obj 21 88 *~;
+#X obj 68 87 *~;
+#X obj 36 128 +~;
+#X obj 35 162 sqrt~;
+#X connect 0 0 2 0;
+#X connect 2 0 3 0;
+#X connect 2 0 3 1;
+#X connect 2 1 4 0;
+#X connect 2 1 4 1;
+#X connect 3 0 5 0;
+#X connect 4 0 5 1;
+#X connect 5 0 6 0;
+#X connect 6 0 1 0;
+#X restore 324 522 pd magnitude~;
+#X obj 324 632 tabsend~ magnitude;
+#X obj 162 522 tabsend~ oscillator;
+#X msg 48 600 \; pd dsp 1;
+#N canvas 175 135 1046 797 setup_graphs 0;
+#X msg 57 118 \; magnitude yticks 0 0.5 2;
+#X msg 58 205 \; magnitude ylabel -0.5 1;
+#X obj 11 12 inlet;
+#X obj 12 42 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X msg 55 311 \; oscillator yticks 0 1 1;
+#X msg 54 398 \; oscillator ylabel -0.5 -1 0 1;
+#X msg 54 356 \; oscillator xlabel -1.05 0 \$1;
+#X floatatom 404 42 5 0 0 0 - - -;
+#X obj 420 74 / 2;
+#X obj 344 123 expr $f1 - 1;
+#X obj 465 74 / 8;
+#X msg 58 163 \; magnitude xlabel -0.05 0 \$1;
+#X obj 66 279 array size oscillator;
+#X obj 73 48 array size magnitude;
+#X obj 463 153 expr $f1 + 1;
+#X msg 57 77 \; magnitude xticks 0 1 \$1;
+#X obj 326 279 array size window_sinc_kernel;
+#X msg 314 356 \; window_sinc_kernel xlabel -1.05 0 \$1;
+#X msg 314 398 \; window_sinc_kernel ylabel -0.5 -1 0 1;
+#X msg 315 311 \; window_sinc_kernel yticks 0 0.5 2;
+#X obj 404 13 r BLOCK_SIZE;
+#X connect 2 0 3 0;
+#X connect 3 0 0 0;
+#X connect 3 0 1 0;
+#X connect 3 0 4 0;
+#X connect 3 0 5 0;
+#X connect 3 0 19 0;
+#X connect 3 0 18 0;
+#X connect 7 0 9 0;
+#X connect 7 0 10 0;
+#X connect 7 0 8 0;
+#X connect 7 0 12 0;
+#X connect 8 0 11 0;
+#X connect 8 0 14 0;
+#X connect 8 0 17 0;
+#X connect 9 0 6 0;
+#X connect 10 0 15 0;
+#X connect 14 0 13 0;
+#X connect 14 0 16 0;
+#X connect 20 0 7 0;
+#X restore 128 606 pd setup_graphs;
+#X obj 324 604 /~;
+#X obj 342 580 / 2;
+#X obj 53 569 loadbang;
+#X obj 242 284 osc~;
+#X obj 342 555 r BLOCK_SIZE;
+#N canvas 0 25 450 278 (subpatch) 0;
+#X array oscillator 64 float 5;
+#A 0 0 0.00240764 0.00960734 0.0215298 0.0380601 0.0590392 0.0842649
+0.113494 0.146446 0.182803 0.222214 0.264301 0.308658 0.354857 0.402455
+0.450991 0.5 0.549009 0.597545 0.645143 0.691342 0.735699 0.777786
+0.817197 0.853554 0.886506 0.915736 0.940961 0.96194 0.978471 0.990393
+0.997593 1 0.997592 0.990392 0.978469 0.961939 0.940959 0.915733 0.886503
+0.853551 0.817194 0.777782 0.735695 0.691338 0.645139 0.597541 0.549004
+0.499996 0.450987 0.40245 0.354853 0.308654 0.264297 0.222211 0.182799
+0.146443 0.113491 0.084262 0.0590366 0.038058 0.0215281 0.00960615
+0.00240701;
+#X coords 0 1 63 -1 200 140 1 0 0;
+#X restore 506 251 graph;
+#N canvas 0 25 450 278 (subpatch) 0;
+#X array magnitude 33 float 1;
+#A 0 0.999997 0.500001 9.83209e-07 3.76119e-07 1.73983e-07 8.36366e-08
+4.14657e-08 3.85158e-08 3.24446e-08 3.80696e-08 2.29723e-08 2.06399e-08
+1.91079e-08 6.07395e-09 1.43736e-08 1.0876e-08 1.00307e-08 1.32167e-08
+5.72607e-09 8.48679e-09 7.3075e-09 7.11344e-09 9.106e-09 8.50282e-09
+3.53086e-09 6.98663e-09 7.08994e-09 7.2558e-09 1.27128e-08 2.3259e-09
+1.24219e-08 5.02545e-09 3.72529e-09;
+#X coords 0 1.5 32 0 400 140 1 0 0;
+#X restore 506 431 graph;
+#X msg 7 170 set \$1 1 1;
+#X obj 7 194 block~;
+#X obj 99 170 s BLOCK_SIZE;
+#X obj 242 313 hanning~;
+#X obj 365 284 r BLOCK_SIZE;
+#X text 435 95 green slider : whole number cycles/block;
+#X text 435 130 blue slider : any frequency;
+#X text 434 163 purple selector : toggle between green and blue slider
+;
+#X text 448 9 NOTE: ORANGE/YELLOW BOXES ARE FOR DISPLAY ONLY -- DO
+NOT TOUCH, f 63;
+#X text 29 427 slider and box control lift;
+#X text 43 366 by hanning window;
+#X text 42 351 oscillator is multiplied;
+#X text 29 449 notice how magnitude changes;
+#X text 584 576 NOTE: POINTS VIEW IS MOST ACCURATE;
+#X text 551 594 (right click graph -> properties -> draw as);
+#X text 9 221 block size controls the length;
+#X text 9 239 of the fourier transform;
+#X text 490 30 (any other color can be interacted with);
+#X obj 7 9 block-controller;
+#X obj 242 24 frequency-controller;
+#X connect 0 0 5 0;
+#X connect 5 0 1 0;
+#X connect 6 0 5 1;
+#X connect 7 0 3 0;
+#X connect 7 0 4 0;
+#X connect 8 0 15 0;
+#X connect 9 0 6 0;
+#X connect 12 0 13 0;
+#X connect 15 0 2 0;
+#X connect 15 0 0 0;
+#X connect 16 0 15 1;
+#X connect 30 0 12 0;
+#X connect 30 1 14 0;
+#X connect 31 0 8 0;
+#X connect 31 1 8 1;
