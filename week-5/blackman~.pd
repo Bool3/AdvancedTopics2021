@@ -1,0 +1,78 @@
+#N canvas 215 253 918 546 12;
+#X obj 385 190 samplerate~;
+#X obj 385 262 osc~;
+#X obj 376 15 loadbang;
+#X msg 480 190 0;
+#N canvas 0 25 450 278 (subpatch) 0;
+#X array \$1-blackman 64 float 5;
+#A 0 -1.49012e-08 0.000870451 0.00351771 0.00804739 0.0146287 0.0234849
+0.0348797 0.0491017 0.0664461 0.0871955 0.111599 0.139855 0.172089
+0.20834 0.248544 0.292528 0.34 0.390546 0.443635 0.498625 0.554774
+0.611254 0.667172 0.721591 0.773555 0.822114 0.866351 0.905408 0.93851
+0.964989 0.984304 0.996056 1 0.996055 0.984303 0.964987 0.938507 0.905405
+0.866348 0.82211 0.773551 0.721587 0.667167 0.611249 0.55477 0.498621
+0.443631 0.390542 0.339996 0.292524 0.24854 0.208336 0.172086 0.139852
+0.111596 0.0871927 0.0664434 0.0490992 0.0348774 0.0234829 0.0146271
+0.00804612 0.00351687 0.000870012;
+#X coords 0 1 63 0 100 70 1 0 0;
+#X restore 213 123 graph;
+#X obj 376 148 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 67 300 inlet~;
+#X obj 67 367 *~;
+#X obj 67 398 outlet~;
+#X obj 385 214 / 1;
+#X msg 666 153 xlabel -0.05 0 \$1;
+#X obj 376 117 delay 100 1 msec;
+#X obj 666 129 expr $f1 - 1;
+#X obj 201 214 cnv 15 128 22 \$0-bman-inst-send \$0-bman-inst-recv
+instance_1 4 12 0 12 -228856 -66577 0;
+#X obj 34 47 f \$1;
+#X msg 34 75 label instance_\$1;
+#X obj 200 235 cnv 2 7 2 empty empty empty 20 12 0 14 -1 -66577 0;
+#X obj 496 17 inlet length;
+#X obj 385 292 *~ -0.5;
+#X msg 560 153 ylabel -0.5 1;
+#X obj 627 77 array size \$1-blackman;
+#X obj 622 199 s \$1-blackman;
+#X obj 376 409 tabwrite~ \$1-blackman;
+#X obj 85 334 tabreceive~ \$1-blackman;
+#X obj 34 104 s \$0-bman-inst-recv;
+#X obj 504 292 osc~;
+#X obj 504 316 *~ 0.08;
+#X obj 385 316 +~ 0.42;
+#X obj 385 374 +~;
+#X msg 205 277 \; 1-blackman const 0;
+#X obj 504 263 * 2;
+#X connect 0 0 9 0;
+#X connect 1 0 18 0;
+#X connect 2 0 19 0;
+#X connect 2 0 14 0;
+#X connect 2 0 11 0;
+#X connect 3 0 1 1;
+#X connect 3 0 25 1;
+#X connect 5 0 0 0;
+#X connect 5 0 3 0;
+#X connect 5 0 22 0;
+#X connect 6 0 7 0;
+#X connect 7 0 8 0;
+#X connect 9 0 1 0;
+#X connect 9 0 30 0;
+#X connect 10 0 21 0;
+#X connect 11 0 5 0;
+#X connect 12 0 10 0;
+#X connect 14 0 15 0;
+#X connect 15 0 24 0;
+#X connect 17 0 9 1;
+#X connect 17 0 11 0;
+#X connect 17 0 12 0;
+#X connect 17 0 20 0;
+#X connect 18 0 27 0;
+#X connect 19 0 21 0;
+#X connect 23 0 7 1;
+#X connect 25 0 26 0;
+#X connect 26 0 28 1;
+#X connect 27 0 28 0;
+#X connect 28 0 22 0;
+#X connect 30 0 25 0;
+#X coords 0 -1 1 1 130 137 2 200 100;

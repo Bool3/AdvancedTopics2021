@@ -1,0 +1,43 @@
+#N canvas 0 25 377 360 12;
+#X obj 275 119 trigger b f;
+#X msg 275 144 2;
+#X obj 275 94 int;
+#X obj 67 132 bng 18 250 50 0 empty empty set block 25 9 0 12 -261234
+-1 -1;
+#X obj 31 273 f;
+#X obj 165 85 cnv 15 50 20 empty empty empty 20 12 0 14 -261682 -66577
+0;
+#X floatatom 165 86 7 0 0 0 - - -;
+#X obj 82 87 nbx 3 18 6 10 0 0 empty empty 2^ -19 9 0 13 -204800 -1
+-1 6 256;
+#X obj 117 272 f;
+#X obj 67 165 bng 18 250 50 0 empty empty set number 25 9 0 12 -204786
+-1 -1;
+#X obj 275 170 pow 1;
+#X msg 243 30 6;
+#X obj 243 7 loadbang;
+#X obj 23 220 delay 100 1 msec;
+#X text 141 87 =;
+#X obj 243 53 delay 500 1 msec;
+#X obj 31 315 outlet;
+#X obj 117 315 outlet;
+#X text 54 53 BLOCK CTRL;
+#X connect 0 0 1 0;
+#X connect 0 1 10 1;
+#X connect 1 0 10 0;
+#X connect 2 0 0 0;
+#X connect 3 0 4 0;
+#X connect 3 0 13 0;
+#X connect 4 0 16 0;
+#X connect 6 0 4 1;
+#X connect 6 0 8 1;
+#X connect 7 0 2 0;
+#X connect 8 0 17 0;
+#X connect 9 0 8 0;
+#X connect 10 0 6 0;
+#X connect 11 0 7 0;
+#X connect 11 0 15 0;
+#X connect 12 0 11 0;
+#X connect 13 0 8 0;
+#X connect 15 0 3 0;
+#X coords 0 -1 1 1 180 150 2 50 50;

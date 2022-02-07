@@ -1,0 +1,31 @@
+#N canvas 96 311 248 249 12;
+#X obj 36 100 bng 26 250 50 0 empty empty empty 17 7 0 10 -262144 -258113
+-1;
+#X text 27 75 CLOCK;
+#X obj 73 104 nbx 5 18 -1e+37 1e+37 0 0 empty empty msec 70 9 0 12
+-204800 -1 -1 1000 256;
+#X obj 36 207 outlet;
+#X obj 73 174 metro;
+#X obj 178 100 tgl 26 0 empty empty empty 17 7 0 10 -204786 -1 -1 0
+1;
+#X msg 73 48 1000;
+#X msg 178 49 0;
+#X obj 178 207 outlet;
+#X obj 178 154 sel 0;
+#X obj 178 181 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 106 14 loadbang;
+#X msg 73 140 tempo \$1 msec;
+#X connect 0 0 3 0;
+#X connect 2 0 12 0;
+#X connect 4 0 0 0;
+#X connect 5 0 4 0;
+#X connect 5 0 9 0;
+#X connect 6 0 2 0;
+#X connect 7 0 5 0;
+#X connect 9 0 10 0;
+#X connect 10 0 8 0;
+#X connect 11 0 6 0;
+#X connect 11 0 7 0;
+#X connect 12 0 4 0;
+#X coords 0 -1 1 1 190 60 2 25 75;
