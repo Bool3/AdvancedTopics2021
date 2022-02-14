@@ -1,0 +1,161 @@
+#N canvas 308 25 872 833 12;
+#X declare -path bsaylor;
+#X obj 284 369 tabsend~ magnitude;
+#X msg 9 91 \; pd dsp 1;
+#N canvas 308 115 684 539 setup_graphs 0;
+#X obj 12 12 inlet;
+#X obj 12 42 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X floatatom 404 42 5 0 0 0 - - -;
+#X obj 423 72 / 2;
+#X obj 323 248 expr $f1 - 1;
+#X obj 99 83 / 8;
+#X obj 167 92 array size oscillator;
+#X obj 148 405 s oscillator;
+#X obj 15 411 s magnitude;
+#X msg 272 279 ylabel -0.5 1;
+#X msg 427 284 xlabel -0.05 0 \$1;
+#X msg 141 280 yticks 0 0.5 2;
+#X msg 15 280 xticks 0 1 \$1;
+#X msg 146 305 yticks 0 1 1;
+#X msg 425 309 xlabel -1.05 0 \$1;
+#X msg 271 306 ylabel -0.5 -1 0 1;
+#X msg 22 305 xticks 0 \$1 1;
+#X obj 159 429 s output;
+#X obj 167 120 array size output;
+#X msg 328 29 64;
+#X connect 0 0 1 0;
+#X connect 1 0 9 0;
+#X connect 1 0 11 0;
+#X connect 1 0 13 0;
+#X connect 1 0 15 0;
+#X connect 1 0 19 0;
+#X connect 2 0 4 0;
+#X connect 2 0 5 0;
+#X connect 2 0 3 0;
+#X connect 2 0 6 0;
+#X connect 2 0 18 0;
+#X connect 3 0 16 0;
+#X connect 3 0 10 0;
+#X connect 4 0 14 0;
+#X connect 5 0 12 0;
+#X connect 9 0 8 0;
+#X connect 10 0 8 0;
+#X connect 11 0 8 0;
+#X connect 12 0 8 0;
+#X connect 13 0 7 0;
+#X connect 13 0 17 0;
+#X connect 14 0 7 0;
+#X connect 14 0 17 0;
+#X connect 15 0 7 0;
+#X connect 15 0 17 0;
+#X connect 19 0 2 0;
+#X restore 87 91 pd setup_graphs;
+#X obj 87 62 loadbang;
+#N canvas 0 25 450 278 (subpatch) 0;
+#X array oscillator 64 float 5;
+#A 0 1 0.995185 0.980785 0.95694 0.92388 0.881922 0.83147 0.773011
+0.707108 0.634394 0.555572 0.471398 0.382685 0.290286 0.195091 0.0980175
+7.54979e-08 -0.0980173 -0.195091 -0.290285 -0.382684 -0.471398 -0.555572
+-0.634395 -0.707108 -0.773012 -0.831471 -0.881923 -0.923881 -0.956941
+-0.980786 -0.995185 -1 -0.995184 -0.980784 -0.956939 -0.923877 -0.881919
+-0.831466 -0.773006 -0.707102 -0.634388 -0.555564 -0.47139 -0.382677
+-0.290277 -0.195082 -0.0980089 8.59499e-06 0.098026 0.195099 0.290294
+0.382692 0.471406 0.555579 0.634401 0.707114 0.773017 0.831476 0.881927
+0.923884 0.956944 0.980788 0.995186;
+#X coords 0 1 63 -1 200 140 1 0 0;
+#X restore 430 36 graph;
+#N canvas 0 25 450 278 (subpatch) 0;
+#X array magnitude 33 float 1;
+#A 0 5.30242e-06 1 1.95931e-06 7.61552e-07 3.48424e-07 1.58905e-07
+9.09958e-08 6.95103e-08 7.07588e-08 7.24879e-08 5.22606e-08 4.04643e-08
+2.89536e-08 1.52194e-08 2.38546e-08 2.56934e-08 1.93538e-08 2.28583e-08
+1.35361e-08 1.32318e-08 1.76217e-08 1.49861e-08 1.95261e-08 9.47636e-09
+1.03078e-08 1.01341e-08 9.04219e-09 1.37658e-08 1.57447e-08 1.18978e-08
+1.42861e-08 6.76245e-09 2.3903e-09;
+#X coords 0 1.5 32 0 400 140 1 0 0;
+#X restore 430 230 graph;
+#X obj 210 33 frequency-controller;
+#X obj 284 313 magnitude~;
+#X obj 450 420 window-sinc-kernel-generator~ 1;
+#N canvas 0 22 450 278 (subpatch) 0;
+#X array output 64 float 5;
+#A 0 -0.999975 -0.99516 -0.98076 -0.956916 -0.923855 -0.881898 -0.831447
+-0.772989 -0.707086 -0.634374 -0.555553 -0.471381 -0.382669 -0.290272
+-0.19508 -0.0980088 6.12531e-06 0.0980211 0.195092 0.290284 0.38268
+0.471392 0.555563 0.634384 0.707095 0.772997 0.831454 0.881904 0.92386
+0.956919 0.980763 0.995161 0.999975 0.99516 0.980761 0.956917 0.923858
+0.881901 0.831451 0.772993 0.707092 0.634381 0.55556 0.471388 0.382677
+0.290281 0.195088 0.0980175 2.54903e-06 -0.0980125 -0.195084 -0.290276
+-0.382672 -0.471384 -0.555556 -0.634377 -0.707089 -0.772991 -0.831449
+-0.881899 -0.923857 -0.956917 -0.980761 -0.99516;
+#X coords 0 1 63 -1 200 140 1 0 0;
+#X restore 179 494 graph;
+#X obj 103 393 tabsend~ output;
+#X obj 238 401 tabsend~ oscillator;
+#X obj 61 354 partconv~ 1-ws-kernel 64;
+#X obj 30 645 dac~;
+#X obj 69 422 vsl 15 128 0 100 0 0 empty empty empty 0 -9 0 10 -204800
+-1 -1 0 1;
+#X obj 30 612 *~;
+#X obj 210 282 osc~;
+#X msg 29 137 0;
+#X obj 69 560 dbtorms;
+#X floatatom 69 584 9 0 0 0 - - -;
+#X obj 841 659 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X msg 77 326 set 1-ws-kernel;
+#X text 87 421 V;
+#X text 87 435 O;
+#X text 87 449 L;
+#X text 87 463 U;
+#X text 87 478 M;
+#X text 87 492 E;
+#X text 15 681 NOTES:;
+#X text 16 707 - hold shift then click for finer control on sliders
+;
+#X text 16 732 - volume slider is in dB \, so only audible close to
+top;
+#X text 16 756 - pitch gets high really fast when using sliders (CAN
+HURT);
+#X obj 284 341 /~ 32;
+#X msg 450 392 64;
+#X text 448 671 - BLOCK CTRL is not necessary anymore because partconv~
+handles it -- you can change the block size in a given abstraction
+without changing the blocksize of its parent \, and so it adjusts the
+FFT size automatically given the filter kernel and input buffer size
+-- you can see it do this in the Pd console when you update the kernel
+;
+#X text 15 781 - parameter 'M' controls the length of the kernel;
+#X text 787 388 (22050 Hz);
+#X msg 210 10 64;
+#X obj 10 10 declare -path bsaylor;
+#X text 451 765 - partconv~ (or the greater dependency idunno) fucks
+up the dac~ and makes the second channel much stronger than the first
+\, so if it feels like everything is in your right ear \, it probably
+is, f 53;
+#X connect 3 0 1 0;
+#X connect 3 0 2 0;
+#X connect 3 0 17 0;
+#X connect 3 0 33 0;
+#X connect 3 0 37 0;
+#X connect 6 0 16 0;
+#X connect 6 1 16 1;
+#X connect 7 0 32 0;
+#X connect 8 2 20 0;
+#X connect 12 0 10 0;
+#X connect 12 0 15 0;
+#X connect 14 0 18 0;
+#X connect 16 0 11 0;
+#X connect 16 0 7 0;
+#X connect 16 0 12 0;
+#X connect 17 0 14 0;
+#X connect 18 0 19 0;
+#X connect 19 0 15 1;
+#X connect 20 0 21 0;
+#X connect 21 0 12 0;
+#X connect 32 0 0 0;
+#X connect 33 0 8 0;
+#X connect 33 0 8 1;
+#X connect 37 0 6 0;
+#X coords 0 833 1 832 85 60 0;

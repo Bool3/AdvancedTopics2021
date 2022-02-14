@@ -1,0 +1,111 @@
+#N canvas 478 198 359 595 12;
+#X floatatom 31 438 9 0 0 0 - - -;
+#X obj 31 415 *;
+#X obj 49 359 samplerate~;
+#X obj 49 382 / 2;
+#X floatatom 31 328 5 0 0 0 - - -;
+#X obj 12 12 loadbang;
+#X obj 117 495 spigot;
+#X obj 216 496 spigot;
+#N canvas 651 325 450 300 not 0;
+#X obj 17 50 expr 1 - $f1;
+#X obj 17 11 inlet;
+#X obj 17 85 outlet;
+#X connect 0 0 2 0;
+#X connect 1 0 0 0;
+#X restore 156 470 pd not;
+#X obj 234 78 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144 -1
+-1;
+#X obj 169 135 hradio 20 1 0 2 empty empty empty 0 -8 0 10 -232576
+-1 -1 0;
+#X obj 116 50 / 2;
+#X msg 182 74 0;
+#X obj 174 551 outlet;
+#X obj 153 217 cnv 15 70 20 empty empty empty 20 12 0 14 -261682 -66577
+0;
+#X floatatom 156 218 9 0 0 2 frequency - -;
+#X obj 116 141 cnv 15 35 150 empty empty empty 20 12 0 14 -204786 -66577
+0;
+#N canvas 119 342 547 479 discrete 0;
+#X obj 208 110 vsl 18 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 198 1;
+#X obj 208 110 vsl 18 128 0 1 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 0 1;
+#X obj 98 372 outlet;
+#X obj 208 45 inlet;
+#X obj 270 45 inlet;
+#X text 308 126 The trick here is to use two sliders. The one in the
+front just acts as a display \, but we're in fact interacting to the
+one in the background., f 29;
+#X text 274 21 steps;
+#X text 207 21 value;
+#X obj 98 321 change;
+#X obj 98 284 expr int($f1 * $f2) / $f2;
+#X obj 270 229 int;
+#X msg 54 225 set \$1;
+#X floatatom 98 345 9 0 0 0 - - -;
+#X obj 187 425 outlet;
+#X obj 197 383 *;
+#X obj 205 340 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X connect 0 0 9 0;
+#X connect 3 0 0 0;
+#X connect 4 0 10 0;
+#X connect 8 0 11 0;
+#X connect 8 0 12 0;
+#X connect 9 0 8 0;
+#X connect 10 0 9 1;
+#X connect 10 0 14 1;
+#X connect 10 0 15 0;
+#X connect 11 0 1 0;
+#X connect 12 0 2 0;
+#X connect 12 0 14 0;
+#X connect 14 0 13 0;
+#X connect 15 0 14 0;
+#X coords 0 -1 1 1 35 150 2 200 100;
+#X restore 115 141 pd discrete;
+#X obj 226 142 cnv 15 35 150 empty empty empty 20 12 0 14 -204800 -66577
+0;
+#X obj 234 151 vsl 18 128 0 22050 0 0 empty empty empty 0 -9 0 10 -262144
+-1 -1 2600 1;
+#X obj 288 330 outlet;
+#X obj 288 286 bng 15 250 50 0 empty empty empty 17 7 0 10 -262144
+-1 -1;
+#X obj 113 305 cnv 15 41 19 empty empty empty 20 12 0 14 -262130 -66577
+0;
+#X floatatom 116 307 5 0 0 1 cycles/block - -;
+#X text 123 289 ||;
+#X msg 288 306 0;
+#X text 104 103 FREQUENCY CTRL;
+#X obj 114 18 inlet BLOCK_SIZE;
+#X obj 92 78 pow -1;
+#X connect 0 0 6 0;
+#X connect 1 0 0 0;
+#X connect 2 0 3 0;
+#X connect 3 0 1 1;
+#X connect 4 0 1 0;
+#X connect 5 0 2 0;
+#X connect 5 0 12 0;
+#X connect 6 0 15 0;
+#X connect 6 0 13 0;
+#X connect 7 0 15 0;
+#X connect 7 0 13 0;
+#X connect 8 0 6 1;
+#X connect 9 0 0 0;
+#X connect 9 0 19 0;
+#X connect 10 0 7 1;
+#X connect 10 0 8 0;
+#X connect 10 0 9 0;
+#X connect 11 0 17 1;
+#X connect 11 0 28 0;
+#X connect 12 0 10 0;
+#X connect 12 0 19 0;
+#X connect 17 0 4 0;
+#X connect 17 1 23 0;
+#X connect 19 0 7 0;
+#X connect 19 0 21 0;
+#X connect 21 0 25 0;
+#X connect 25 0 20 0;
+#X connect 27 0 11 0;
+#X connect 28 0 17 0;
+#X coords 0 -1 1 1 175 240 2 100 100;
