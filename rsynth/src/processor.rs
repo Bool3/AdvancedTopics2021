@@ -25,14 +25,14 @@ impl RProcessor {
             volume: 0.125f32
         };
         
-        processor.update_angle_delta(44100f32);
+        processor.update_phase_increment(44100f32);
         
         return processor;
     }
     
-    pub fn update_angle_delta(&mut self, sample_rate: f32) {
+    pub fn update_phase_increment(&mut self, sample_rate: f32) {
         for voice in &mut self.voices {
-            voice.update_angle_delta(sample_rate);
+            voice.update_phase_increment(sample_rate);
         }
     }
     
@@ -62,7 +62,7 @@ impl RProcessor {
     
     pub fn reset(&mut self) {
         for voice in &mut self.voices {
-            voice.pos = 0f32;
+            voice.phase = 0.0;
         }
     }
 }

@@ -88,7 +88,7 @@ impl Plugin for RSynth {
     
     fn set_sample_rate(&mut self, rate: f32) {
         for processor in &mut self.processors {
-            processor.update_angle_delta(rate);
+            processor.update_phase_increment(rate);
         }
     }
     
