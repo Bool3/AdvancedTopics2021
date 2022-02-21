@@ -13,6 +13,7 @@ pub struct RVoice {
     pub phase: f32,             // range: [0, TWO_PI)
     phase_increment: f32,       // range: [0, PI]
     blep_splice_length: f32,    // phase_increment * 4.0
+    last_output: f32,           // only for triangle (because of leaky integrator)
 }
 
 
@@ -39,6 +40,7 @@ impl RVoice {
             phase: 0.0,
             phase_increment: 0.0,
             blep_splice_length: 0.0,
+            last_output: 0.0,
         };
         
         new_voice.update_phase_increment(44100.0);
@@ -69,8 +71,19 @@ impl RVoice {
                     f32::sin(self.phase)
                 },
                 Wave::Triangle => {
-                    // naive triangle
-                    1.0 + (-2.0 * f32::abs(self.phase - PI)) / PI
+                    // get bandlimited square
+                    let square_val = self.process(Wave::Square);
+
+                    // move phase back because we call self.process()
+                    self.phase -= self.phase_increment;
+
+                    // leaky integrator: y[n] = A * x[n] + (1 - A) * y[n - 1]
+                    let tri_val = 0.025 * square_val + (1.0 - 0.025) * self.last_output;
+                    
+                    self.last_output = tri_val;
+
+                    // normalize
+                    tri_val * 4.0
                 },
                 Wave::Square => {
                     // near upwards discontinuity (~0)
@@ -94,9 +107,14 @@ impl RVoice {
                     }
                 },
                 Wave::Saw => {
-                    // naive downwards saw
-                    let naive_saw = 1.0 - (self.phase / PI);
-                    naive_saw
+                    // near upwards discontinuity (~0)
+                    if self.phase <= self.blep_splice_length {
+                        blep_up(self.phase / self.blep_splice_length * PI)
+
+                    } else {
+                        // downwards saw (shifted to match discontinuity)
+                        1.0 - ((self.phase - self.blep_splice_length / 2.0) / PI)
+                    }
                 },
                 _ => {
                     f32::sin(self.phase)
