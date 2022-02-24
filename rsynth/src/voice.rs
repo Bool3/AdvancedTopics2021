@@ -6,6 +6,7 @@ use crate::wave::Wave;
 
 const PI: f32 = std::f32::consts::PI;
 const TWO_PI: f32 = 2.0 * std::f32::consts::PI;
+const BLEP_MAX: f32 = 1.4142135; // maximum value achieved by the blep = blep(PI/4)
 
 pub struct RVoice {
     frequency: f32,             // Hz
@@ -15,7 +16,6 @@ pub struct RVoice {
     blep_splice_length: f32,    // phase_increment * 4.0
     last_output: f32,           // only for triangle (because of leaky integrator)
 }
-
 
 fn note_to_frequency(note_number: u8) -> f32 {
     return 440.0 * 2.0_f32.powf((note_number as f32 - 69.0) / 12.0);
@@ -78,12 +78,11 @@ impl RVoice {
                     self.phase -= self.phase_increment;
 
                     // leaky integrator: y[n] = A * x[n] + (1 - A) * y[n - 1]
-                    let tri_val = 0.025 * square_val + (1.0 - 0.025) * self.last_output;
+                    let tri_val = self.phase_increment * square_val + (1.0 - self.phase_increment) * self.last_output;
                     
                     self.last_output = tri_val;
 
-                    // normalize
-                    tri_val * 4.0
+                    tri_val
                 },
                 Wave::Square => {
                     // near upwards discontinuity (~0)
@@ -112,14 +111,17 @@ impl RVoice {
                         blep_up(self.phase / self.blep_splice_length * PI)
 
                     } else {
-                        // downwards saw (shifted to match discontinuity)
-                        1.0 - ((self.phase - self.blep_splice_length / 2.0) / PI)
+                        // shift phase to match discontinuity
+                        let shifted_phase = self.phase - self.blep_splice_length / 2.0;
+
+                        // downwards saw
+                        1.0 - (shifted_phase / PI)
                     }
                 },
-                _ => {
-                    f32::sin(self.phase)
-                }
             };
+
+            self.normalize(val, wave);
+
         } else {
             val = 0.0;
         };
@@ -134,6 +136,23 @@ impl RVoice {
 
         if self.phase > TWO_PI {
             self.phase -= TWO_PI;
+        }
+    }
+
+    fn normalize(&self, output: f32, wave: Wave) -> f32 {
+        match wave {
+            Wave::Sine => {
+                output
+            }
+            Wave::Triangle => {
+                output
+            }
+            Wave::Square => {
+                output / BLEP_MAX
+            }
+            Wave::Saw => {
+                output / BLEP_MAX
+            }
         }
     }
 }
