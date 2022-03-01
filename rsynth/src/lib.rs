@@ -8,10 +8,10 @@ use vst::{plugin::{Plugin, Info, HostCallback, CanDo, PluginParameters}, plugin_
 
 mod wave;
 mod params;
-mod editor;
 mod processor;
 mod voice;
-mod ui;
+mod adsr;
+mod osc;
 
 #[derive(Default)]
 struct RSynth {
@@ -23,15 +23,6 @@ struct RSynth {
 impl Plugin for RSynth {
     
     fn new(host: HostCallback) -> RSynth {
-        
-        CombinedLogger::init(
-            vec![
-                WriteLogger::new(LevelFilter::Info, Config::default(), File::create("C:\\Users\\Arthur\\Desktop\\rsynth.log").unwrap()),
-            ]
-        ).unwrap();
-        
-        info!("Logger initialized");
-        
         let params = Arc::new(params::RParams::default());
         
         let mut processors = Vec::new();
@@ -41,9 +32,9 @@ impl Plugin for RSynth {
         }
         
         return RSynth {
-            host: host,
-            params: params,
-            processors: processors
+            host,
+            params,
+            processors,
         }
     }
     
@@ -60,7 +51,7 @@ impl Plugin for RSynth {
             inputs: 2,
             outputs: 2,
             
-            parameters: 1,
+            parameters: 2,
             
             
             ..Default::default()
@@ -82,13 +73,9 @@ impl Plugin for RSynth {
         return self.params.clone();
     }
     
-    fn get_editor(&mut self) -> Option<Box<dyn Editor>> {
-        return Some(Box::new(editor::REditor::new(self.params.clone())))
-    }
-    
     fn set_sample_rate(&mut self, rate: f32) {
         for processor in &mut self.processors {
-            processor.update_phase_increment(rate);
+            processor.update_sampling_rate(rate);
         }
     }
     
@@ -108,7 +95,7 @@ impl Plugin for RSynth {
                         // note on
                         144 => {
                             for processor in &mut self.processors {
-                                processor.note_on(val.data[1]);
+                                processor.note_on(val.data[1], val.data[2]);
                             }
                         },
                         // note off
