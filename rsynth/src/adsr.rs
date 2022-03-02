@@ -31,7 +31,7 @@ impl Adsr {
             current_sample: 0,
             current_multiplier: 0.0,
 
-            is_done: false,
+            is_done: true,
         }
     }
 
@@ -48,7 +48,7 @@ impl Adsr {
             current_sample: 0,
             current_multiplier: 0.0,
 
-            is_done: false,
+            is_done: true,
         }
     }
 
@@ -68,7 +68,7 @@ impl Adsr {
         self.peak = 0.0;
         self.current_sample = 0;
         self.current_multiplier = 0.0;
-        self.is_done = false;
+        self.is_done = true;
     }
 
     pub fn process(&mut self, val: f32) -> f32 {
@@ -90,14 +90,14 @@ impl Adsr {
             } else if self.current_sample <= self.attack + self.decay {
                 self.current_multiplier = line(self.current_sample - self.attack,
                                                self.peak,
-                                               self.sustain * self.peak,
+                                               self.sustain,
                                                self.decay
                 );
                 self.current_sample += 1;
     
             // SUSTAIN
             } else {
-                self.current_multiplier = self.sustain * self.peak;
+                self.current_multiplier = self.sustain;
                 // don't increment current_sample
             }
 

@@ -16,9 +16,35 @@ pub struct RProcessor {
 
 impl RProcessor {
     pub fn new(params: Arc<RParams>) -> RProcessor {
+
+        // unpack the parameters
+        let attack_lock = params.attack.lock().unwrap();
+        let attack = attack_lock.clone();
+        drop(attack_lock);
+
+        let decay_lock = params.decay.lock().unwrap();
+        let decay = decay_lock.clone();
+        drop(decay_lock);
+
+        let sustain_lock = params.sustain.lock().unwrap();
+        let sustain = sustain_lock.clone();
+        drop(sustain_lock);
+
+        let release_lock = params.release.lock().unwrap();
+        let release = release_lock.clone();
+        drop(release_lock);
+
         let mut voices = Vec::new();
         
         for i in 0..128 {
+            // sample rate is hardcoded -- any way to avoid?
+            let mut new_voice = RVoice::new(i, 44100.0);
+
+            new_voice.envelope.attack = ms_to_samples(attack, 44100.0);
+            new_voice.envelope.decay = ms_to_samples(decay, 44100.0);
+            new_voice.envelope.sustain = sustain;
+            new_voice.envelope.release = ms_to_samples(release, 44100.0);
+
             voices.push(RVoice::new(i, 0.0));
         }
         
@@ -58,7 +84,7 @@ impl RProcessor {
         let attack_lock = self.params.attack.lock().unwrap();
         let attack = attack_lock.clone();
         drop(attack_lock);
-        /*
+        
         let decay_lock = self.params.decay.lock().unwrap();
         let decay = decay_lock.clone();
         drop(decay_lock);
@@ -70,18 +96,17 @@ impl RProcessor {
         let release_lock = self.params.release.lock().unwrap();
         let release = release_lock.clone();
         drop(release_lock);
-        */
+        
         let mut val = 0.0;
         
         for voice in &mut self.voices {
             // set adsr
             if voice.envelope.is_done {
                 voice.envelope.attack = ms_to_samples(attack, self.sample_rate);
-                //voice.envelope.decay = ms_to_samples(decay, self.sample_rate);
-                //voice.envelope.sustain = sustain;
+                voice.envelope.decay = ms_to_samples(decay, self.sample_rate);
+                voice.envelope.sustain = sustain;
+                voice.envelope.release = ms_to_samples(release, self.sample_rate);
             }
-
-            //voice.envelope.release = ms_to_samples(release, self.sample_rate);
 
             // process
             val += self.volume * voice.process(wave);

@@ -37,7 +37,7 @@ impl RVoice {
 
     pub fn play(&mut self, velocity: u8) {
         self.is_on = true;
-        self.envelope.start(velocity);
+        self.envelope.start(127);
     }
 
     pub fn stop(&mut self) {

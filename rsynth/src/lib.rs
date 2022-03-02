@@ -13,6 +13,9 @@ mod voice;
 mod adsr;
 mod osc;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Default)]
 struct RSynth {
     host: HostCallback,
@@ -51,7 +54,7 @@ impl Plugin for RSynth {
             inputs: 2,
             outputs: 2,
             
-            parameters: 2,
+            parameters: 5,
             
             
             ..Default::default()
