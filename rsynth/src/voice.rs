@@ -19,7 +19,7 @@ impl RVoice {
             
             is_on: false,
             oscillator: Osc::new(note_to_frequency(note_number), sample_rate),
-            envelope: Adsr::new_test(),
+            envelope: Adsr::new(),
         }
     }
 
@@ -36,8 +36,16 @@ impl RVoice {
     }
 
     pub fn play(&mut self, velocity: u8) {
+
         self.is_on = true;
-        self.envelope.start(127);
+        self.envelope.start(velocity);
+
+
+        /*
+        if velocity != 0 {
+            self.is_on = true;
+            self.envelope.start(velocity);
+        }*/
     }
 
     pub fn stop(&mut self) {

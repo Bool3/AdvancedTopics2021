@@ -1,10 +1,13 @@
-use std::{fs::File, sync::{Arc, Mutex}};
+use std::sync::Arc;
 
-use log::{LevelFilter, info};
-use params::RParams;
-use rand::random;
-use simplelog::{CombinedLogger, WriteLogger, Config};
-use vst::{plugin::{Plugin, Info, HostCallback, CanDo, PluginParameters}, plugin_main, buffer::AudioBuffer, api::{Events, Supported}, event::Event, editor::Editor};
+use vst::{
+    plugin::{Plugin, Info, HostCallback, CanDo, PluginParameters}, 
+    plugin_main, 
+    buffer::AudioBuffer, 
+    api::{Events, Supported}, 
+    event::Event, 
+    editor::Editor
+};
 
 mod wave;
 mod params;
