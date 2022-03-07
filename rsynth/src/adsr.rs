@@ -3,15 +3,15 @@ fn line(index: u32, start: f32, finish: f32, duration: u32) -> f32 {
 }
 
 pub struct Adsr {
-    peak: f32,                  // [0, 1]
-    pub sustain: f32,               // [0, 1]
+    peak: f32,                  // peak volume of envelope [0, 1]
+    pub sustain: f32,           // a fraction [0, 1] (the actual sustain volume = sustain * peak)
     
-    pub attack: u32,                // time (in samples)
-    pub decay: u32,                 // time
-    pub release: u32,               // time
+    pub attack: u32,            // time (in samples)
+    pub decay: u32,             // ""
+    pub release: u32,           // ""
 
-    current_sample: u32,        // current sample of duration
-    current_multiplier: f32,    // the current volume of the envelope
+    current_sample: u32,        // current sample of the envelope's duration
+    volume: f32,                // the current (latest) volume of the envelope
 
     pub is_releasing: bool,
     pub is_done: bool,
@@ -29,24 +29,7 @@ impl Adsr {
             release: 44100,
 
             current_sample: 0,
-            current_multiplier: 0.0,
-
-            is_releasing: false,
-            is_done: true,
-        }
-    }
-
-    pub fn new_test() -> Adsr {
-        Adsr {
-            peak: 0.0,
-            sustain: 0.5,
-
-            attack: 44100 * 2,
-            decay: 44100 * 2,
-            release: 44100 * 2,
-
-            current_sample: 0,
-            current_multiplier: 0.0,
+            volume: 0.0,
 
             is_releasing: false,
             is_done: true,
@@ -54,10 +37,10 @@ impl Adsr {
     }
 
     pub fn start(&mut self, velocity: u8) {
-        self.peak = velocity as f32 / 127.0;
+        self.peak = (velocity as f32) / 127.0;
 
         self.current_sample = 0;
-        self.current_multiplier = 0.0;
+        self.volume = 0.0;
 
         self.is_releasing = false;
         self.is_done = false;
@@ -72,7 +55,7 @@ impl Adsr {
         self.peak = 0.0;
 
         self.current_sample = 0;
-        self.current_multiplier = 0.0;
+        self.volume = 0.0;
         
         self.is_releasing = false;
         self.is_done = true;
@@ -81,19 +64,20 @@ impl Adsr {
     pub fn process(&mut self, val: f32) -> f32 {
         let mut val = val;
 
-        // if you did a stupid and passed 0 in as the peak
+        // you did a stupid and passed 0 in as the peak
         if self.peak == 0.0 {
 
             self.is_done = true;
             val = 0.0;
 
+        // the peak is non-zero
         } else {
             
             if !self.is_releasing {
 
                 // ATTACK
                 if self.current_sample <= self.attack {
-                    self.current_multiplier = line(self.current_sample,
+                    self.volume = line(self.current_sample,
                                                 0.0,
                                                 self.peak,
                                                 self.attack
@@ -102,7 +86,7 @@ impl Adsr {
 
                 // DECAY
                 } else if self.current_sample <= self.attack + self.decay {
-                    self.current_multiplier = line(self.current_sample - self.attack,
+                    self.volume = line(self.current_sample - self.attack,
                                                 self.peak,
                                                 self.sustain * self.peak,
                                                 self.decay
@@ -111,19 +95,19 @@ impl Adsr {
         
                 // SUSTAIN
                 } else {
-                    self.current_multiplier = self.sustain * self.peak;
+                    self.volume = self.sustain * self.peak;
                     // don't increment current_sample
                 }
 
-                val *= self.current_multiplier;
+                val *= self.volume;
 
             // RELEASE
             } else {
-                // note: current_multiplier stops being updated
-                // because we now want to decay from that value
+                // note: volume stops being updated
+                //       because we now want to decay from that value
                 if self.current_sample <= self.attack + self.decay + self.release {
                     val *= line(self.current_sample - (self.attack + self.decay),
-                                self.current_multiplier,
+                                self.volume,
                                 0.0,
                                 self.release
                     );

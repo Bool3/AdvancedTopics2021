@@ -62,7 +62,7 @@ impl PluginParameters for RParams {
             },
             3 => {
                 let sustain = self.sustain.lock().unwrap();
-                return (sustain.clone() * 100.0).to_string();
+                return ((sustain.clone() * 100.0) as u32).to_string();
             },
             4 => {
                 let release = self.release.lock().unwrap();
