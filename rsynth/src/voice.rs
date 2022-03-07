@@ -6,19 +6,21 @@ fn note_to_frequency(note_number: u8) -> f32 {
 
 pub struct RVoice {
     sample_rate: f32,
+    pub note: u8,
+    pub is_on: bool,
 
-    is_on: bool,
     oscillator: Osc,
     pub envelope: Adsr,
 }
 
 impl RVoice {
-    pub fn new(note_number: u8, sample_rate: f32) -> RVoice {
+    pub fn new(sample_rate: f32) -> RVoice {
         RVoice {
             sample_rate,
-            
+            note: 69,
             is_on: false,
-            oscillator: Osc::new(note_to_frequency(note_number), sample_rate),
+
+            oscillator: Osc::new(note_to_frequency(69), sample_rate),
             envelope: Adsr::new(),
         }
     }
@@ -35,8 +37,11 @@ impl RVoice {
         self.envelope.reset();
     }
 
-    pub fn play(&mut self, velocity: u8) {
+    pub fn play(&mut self, note: u8, velocity: u8) {
         if velocity != 0 {
+            self.note = note;
+            self.oscillator.update_frequency(note_to_frequency(note));
+            self.oscillator.reset();
             self.is_on = true;
             self.envelope.start(velocity);
         }

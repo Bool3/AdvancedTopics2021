@@ -36,20 +36,20 @@ impl RProcessor {
 
         let mut voices = Vec::new();
         
-        for i in 0..128 {
-            // sample rate is hardcoded -- any way to avoid?
-            let mut new_voice = RVoice::new(i, 44100.0);
+        for _ in 0..128 {
+            // sample rate is set to 44100.0 by default
+            let mut new_voice = RVoice::new(44100.0);
 
             new_voice.envelope.attack = ms_to_samples(attack, 44100.0);
             new_voice.envelope.decay = ms_to_samples(decay, 44100.0);
             new_voice.envelope.sustain = sustain;
             new_voice.envelope.release = ms_to_samples(release, 44100.0);
 
-            voices.push(RVoice::new(i, 0.0));
+            voices.push(RVoice::new(44100.0));
         }
         
         let mut processor = RProcessor {
-            sample_rate: 0.0,
+            sample_rate: 44100.0,
             voices,
             params,
             volume: 0.125
@@ -67,16 +67,34 @@ impl RProcessor {
             voice.update_sample_rate(sample_rate);
         }
     }
+
+    fn find_available_voice(&mut self) -> Option<&mut RVoice> {
+        for voice in &mut self.voices {
+            if !voice.is_on {
+                return Some(voice);
+            }
+        }
+        return None;
+    }
     
     pub fn note_on(&mut self, note_number: u8, velocity: u8) {
-        self.voices[note_number as usize].play(velocity);
+        match self.find_available_voice() {
+            Some(voice) => voice.play(note_number, velocity),
+            None => (),
+        }
     }
     
     pub fn note_off(&mut self, note_number: u8) {
-        self.voices[note_number as usize].release_envelope();
+        for voice in &mut self.voices {
+            if !voice.envelope.is_releasing && voice.note == note_number {
+                voice.release_envelope();
+            }
+        }
     }
     
     pub fn process(&mut self) -> f32 {
+
+        // unlock parameters
         let wave_lock = self.params.wave.lock().unwrap();
         let wave = wave_lock.clone();
         drop(wave_lock);
@@ -100,7 +118,7 @@ impl RProcessor {
         let mut val = 0.0;
         
         for voice in &mut self.voices {
-            // set adsr
+            // set adsr (only if envelope is finished)
             if voice.envelope.is_done {
                 voice.envelope.attack = ms_to_samples(attack, self.sample_rate);
                 voice.envelope.decay = ms_to_samples(decay, self.sample_rate);
