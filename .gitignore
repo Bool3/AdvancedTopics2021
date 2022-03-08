@@ -1,2 +1,7 @@
 .DS_Store
+
+.vscode
+Builds/
+JuceLibraryCode/
+
 week-3/window-sinc-designer/target/
