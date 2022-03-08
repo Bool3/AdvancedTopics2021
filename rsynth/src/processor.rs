@@ -96,13 +96,14 @@ impl RProcessor {
 
         let bend = (pitch_bend as i16) - 8192;
         
-        // if there is no pitch bend
+        // no bend
         if bend == 0 {
             return
         
-        } else {
+        // bending up
+        } else if bend > 0 {
 
-            
+            let bend = (bend as f32) / 8191.0;
 
 
 
@@ -111,6 +112,10 @@ impl RProcessor {
                     
                 }
             }
+
+        // bending down
+        } else {
+
         }
     }
     
