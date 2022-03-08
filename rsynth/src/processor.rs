@@ -91,6 +91,28 @@ impl RProcessor {
             }
         }
     }
+
+    pub fn pitch_bend(&mut self, pitch_bend: u16) {
+
+        let bend = (pitch_bend as i16) - 8192;
+        
+        // if there is no pitch bend
+        if bend == 0 {
+            return
+        
+        } else {
+
+            
+
+
+
+            for voice in &mut self.voices {
+                if voice.is_on {
+                    
+                }
+            }
+        }
+    }
     
     pub fn process(&mut self) -> f32 {
 

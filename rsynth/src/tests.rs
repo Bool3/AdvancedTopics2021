@@ -33,3 +33,19 @@ fn parameters_loading() {
     println!("{}", sustain);
     println!("{}", ms_to_samples(release, 44100.0));
 }
+
+#[test]
+fn bit_shift_test() {
+
+    let data: [u8; 3] = [0b01101011, 0b01101011, 0b11111111];
+
+    let n1 = data[1] as u16;
+    let n2 = data[2] as u16;
+    let n3 = n2 << 8;
+
+    let n4 = n1 | n3;
+
+
+    let binary = format!("{:#b}", n4);
+    println!("{}", binary);
+}

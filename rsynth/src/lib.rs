@@ -110,6 +110,20 @@ impl Plugin for RSynth {
                                 processor.note_off(val.data[1]);
                             }
                         },
+                        // pitch bend
+                        224 => {
+                            // we need to combine the data (two u8) into one u16
+                            let least_significant = val.data[1] as u16;
+                            let most_significant = val.data[2] as u16;
+
+                            let msig_shifted = most_significant << 8;
+
+                            let pitch_bend = least_significant | msig_shifted;
+
+                            for processor in &mut self.processors {
+                                processor.pitch_bend(pitch_bend);
+                            }
+                        },
                         _ => {}
                     }
                 },
