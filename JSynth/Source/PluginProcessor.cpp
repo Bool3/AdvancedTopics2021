@@ -22,7 +22,22 @@ JSynthAudioProcessor::JSynthAudioProcessor()
                        )
 #endif
 {
+    volume = new juce::AudioParameterFloat("volume", "Volume", 0.0, 1.0, 0.125);
+    wave = new juce::AudioParameterChoice("wave", "Wave", { "Sine", "Triangle", "Square", "Saw" }, 0);
+    attack = new juce::AudioParameterFloat("attack", "Attack", 10.0, 4000.0, 10.0);
+    decay = new juce::AudioParameterFloat("decay", "Decay", 10.0, 4000.0, 10.0);
+    sustain = new juce::AudioParameterFloat("sustain", "Sustain", 0.0, 1.0, 0.5);
+    release = new juce::AudioParameterFloat("release", "Release", 10.0, 4000.0, 10.0);
+    
+    addParameter(volume);
+    addParameter(wave);
+    addParameter(attack);
+    addParameter(decay);
+    addParameter(sustain);
+    addParameter(release);
 
+    processors[0] = new JProcessor(*this);
+    processors[1] = new JProcessor(*this);
 }
 
 JSynthAudioProcessor::~JSynthAudioProcessor() {
@@ -34,19 +49,11 @@ const juce::String JSynthAudioProcessor::getName() const {
 }
 
 bool JSynthAudioProcessor::acceptsMidi() const {
-   #if JucePlugin_WantsMidiInput
     return true;
-   #else
-    return false;
-   #endif
 }
 
 bool JSynthAudioProcessor::producesMidi() const {
-   #if JucePlugin_ProducesMidiOutput
-    return true;
-   #else
     return false;
-   #endif
 }
 
 bool JSynthAudioProcessor::isMidiEffect() const {
@@ -136,8 +143,7 @@ void JSynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
+    for (int channel = 0; channel < totalNumInputChannels; ++channel) {
         auto* channelData = buffer.getWritePointer (channel);
 
         // ..do something to the data...
@@ -150,7 +156,7 @@ bool JSynthAudioProcessor::hasEditor() const {
 }
 
 juce::AudioProcessorEditor* JSynthAudioProcessor::createEditor() {
-    return new JSynthAudioProcessorEditor (*this);
+    return new JSynthAudioProcessorEditor(*this);
 }
 
 //==============================================================================

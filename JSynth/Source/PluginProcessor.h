@@ -10,6 +10,8 @@
 
 #include <JuceHeader.h>
 
+#include "Processor/JProcessor.h"
+
 //==============================================================================
 /**
 */
@@ -52,7 +54,17 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
+    juce::AudioParameterFloat* volume;
+    juce::AudioParameterChoice* wave;
+    juce::AudioParameterFloat* attack;
+    juce::AudioParameterFloat* decay;
+    juce::AudioParameterFloat* sustain;
+    juce::AudioParameterFloat* release;
+
 private:
+
+    JProcessor* processors[2];
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JSynthAudioProcessor)
 };

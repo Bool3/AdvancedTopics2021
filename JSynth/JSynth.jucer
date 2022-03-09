@@ -2,10 +2,27 @@
 
 <JUCERPROJECT id="KTMUew" name="JSynth" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              projectLineFeed="&#10;" pluginCharacteristicsValue="pluginIsSynth"
-              cppLanguageStandard="20">
+              projectLineFeed="&#10;" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
+              pluginFormats="buildVST3" pluginAAXCategory="2048" pluginName="JSynth"
+              pluginDesc="JSynth" pluginManufacturer="stork" pluginManufacturerCode="Stor"
+              pluginCode="JSyn" pluginVSTCategory="kPlugCategSynth" companyName="stork"
+              companyCopyright="c" companyWebsite="storkstuff" companyEmail="morestorkstuff"
+              pluginVST3Category="Instrument">
   <MAINGROUP id="tNUQ9r" name="JSynth">
     <GROUP id="{2A7D0527-7675-B86C-F789-267692BDDCEC}" name="Source">
+      <GROUP id="{807F94D4-E39A-5750-863B-0B3767314CDB}" name="Editor"/>
+      <GROUP id="{F8716FBA-41AA-C9EB-0552-4FAFE0CA77B9}" name="Processor">
+        <FILE id="eNYJUR" name="Adsr.cpp" compile="1" resource="0" file="Source/Processor/Adsr.cpp"/>
+        <FILE id="xgfgHx" name="Adsr.h" compile="0" resource="0" file="Source/Processor/Adsr.h"/>
+        <FILE id="gvUWxt" name="JOsc.cpp" compile="1" resource="0" file="Source/Processor/JOsc.cpp"/>
+        <FILE id="r4bgV5" name="JOsc.h" compile="0" resource="0" file="Source/Processor/JOsc.h"/>
+        <FILE id="kyaOFz" name="JProcessor.cpp" compile="1" resource="0" file="Source/Processor/JProcessor.cpp"/>
+        <FILE id="BFfiXM" name="JProcessor.h" compile="0" resource="0" file="Source/Processor/JProcessor.h"/>
+        <FILE id="GCwVPi" name="JVoice.cpp" compile="1" resource="0" file="Source/Processor/JVoice.cpp"/>
+        <FILE id="cr6Bdq" name="JVoice.h" compile="0" resource="0" file="Source/Processor/JVoice.h"/>
+        <FILE id="VKcQ1O" name="Wave.cpp" compile="1" resource="0" file="Source/Processor/Wave.cpp"/>
+        <FILE id="zEZr9L" name="Wave.h" compile="0" resource="0" file="Source/Processor/Wave.h"/>
+      </GROUP>
       <FILE id="ZT73bk" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="fDjnQi" name="PluginProcessor.h" compile="0" resource="0"
@@ -19,8 +36,10 @@
   <EXPORTFORMATS>
     <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="JSynth"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="JSynth"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="JSynth" useRuntimeLibDLL="0"
+                       winArchitecture="x64"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="JSynth" winArchitecture="x64"
+                       useRuntimeLibDLL="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="../../Resources/Installs/JUCE/modules"/>
