@@ -9,6 +9,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+#include "Processor/JProcessor.h"
+
 //==============================================================================
 JSynthAudioProcessor::JSynthAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -137,6 +139,21 @@ void JSynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
+
+    for (const auto metadata : midiMessages) {
+        auto message = metadata.getMessage();
+
+        if (message.isNoteOn()) {
+            processors[0]->noteOn(message.getNoteNumber(), message.getVelocity());
+            processors[1]->noteOn(message.getNoteNumber(), message.getVelocity());
+
+        } else if (message.isNoteOff()) {
+            processors[0]->noteOff(message.getNoteNumber());
+            processors[1]->noteOff(message.getNoteNumber());
+        }
+
+    }
+
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
     // Make sure to reset the state if your inner loop is processing
@@ -144,8 +161,11 @@ void JSynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
     for (int channel = 0; channel < totalNumInputChannels; ++channel) {
-        auto* channelData = buffer.getWritePointer (channel);
+        auto* channelData = buffer.getWritePointer(channel);
 
+        for (int i = 0; i < buffer.getNumSamples(); i++) {
+            channelData[i] = processors[channel]->process();
+        }
         // ..do something to the data...
     }
 }

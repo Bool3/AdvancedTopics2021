@@ -6,6 +6,12 @@ public:
 	Adsr();
 	~Adsr();
 
+	void start(char velocity);
+	void startRelease();
+	void reset();
+	float process(float valBefore);
+
+
 	float attack;
 	float decay;
 	float sustain;

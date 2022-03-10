@@ -10,7 +10,7 @@
 
 #include <JuceHeader.h>
 
-#include "Processor/JProcessor.h"
+extern class JProcessor;
 
 //==============================================================================
 /**

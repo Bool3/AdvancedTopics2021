@@ -1,7 +1,7 @@
 
 #pragma once
 
-enum Wave {
+enum class Wave {
 	Sine = 0,
 	Square = 1,
 	Triangle = 2,

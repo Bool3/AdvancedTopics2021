@@ -4,6 +4,7 @@
 
 #include "Wave.h"
 #include "Adsr.h"
+#include "JOsc.h"
 
 class JVoice {
 public:
@@ -25,8 +26,9 @@ public:
 	char note;
 	bool on;
 
-	Adsr envelope;
+	Adsr* envelope;
 private:
 	float sampleRate;
 
+	JOsc* oscillator;
 };
