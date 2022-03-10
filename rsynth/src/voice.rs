@@ -54,6 +54,12 @@ impl RVoice {
     pub fn release_envelope(&mut self) {
         self.envelope.release();
     }
+
+    pub fn multiply_frequency(&mut self, multiplier: f32) {
+        let new_frequency = note_to_frequency(self.note) * multiplier;
+
+        self.oscillator.update_frequency(new_frequency);
+    }
     
     pub fn process(&mut self, wave: Wave) -> f32 {
         let mut val;

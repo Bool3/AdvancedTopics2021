@@ -57,7 +57,7 @@ impl Plugin for RSynth {
             inputs: 2,
             outputs: 2,
             
-            parameters: 5,
+            parameters: 6,
             
             
             ..Default::default()
@@ -113,6 +113,7 @@ impl Plugin for RSynth {
                         // pitch bend
                         224 => {
                             // we need to combine the data (two u8) into one u16
+                            // note: the actual value has the bounds of a u14
                             let least_significant = val.data[1] as u16;
                             let most_significant = val.data[2] as u16;
 
@@ -121,7 +122,7 @@ impl Plugin for RSynth {
                             let pitch_bend = least_significant | msig_shifted;
 
                             for processor in &mut self.processors {
-                                processor.pitch_bend(pitch_bend);
+                                processor.update_pitch_bend_multiplier(pitch_bend);
                             }
                         },
                         _ => {}

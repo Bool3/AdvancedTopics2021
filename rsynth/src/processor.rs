@@ -12,27 +12,17 @@ pub struct RProcessor {
     voices: Vec<RVoice>,
     params: Arc<RParams>,
     volume: f32,
+    pitch_bend_multiplier: f32,
 }
 
 impl RProcessor {
     pub fn new(params: Arc<RParams>) -> RProcessor {
 
-        // unpack the parameters
-        let attack_lock = params.attack.lock().unwrap();
-        let attack = attack_lock.clone();
-        drop(attack_lock);
-
-        let decay_lock = params.decay.lock().unwrap();
-        let decay = decay_lock.clone();
-        drop(decay_lock);
-
-        let sustain_lock = params.sustain.lock().unwrap();
-        let sustain = sustain_lock.clone();
-        drop(sustain_lock);
-
-        let release_lock = params.release.lock().unwrap();
-        let release = release_lock.clone();
-        drop(release_lock);
+        // get parameters
+        let attack = params.attack();
+        let decay = params.decay();
+        let sustain = params.sustain();
+        let release = params.release();
 
         let mut voices = Vec::new();
         
@@ -52,7 +42,8 @@ impl RProcessor {
             sample_rate: 44100.0,
             voices,
             params,
-            volume: 0.125
+            volume: 0.125,
+            pitch_bend_multiplier: 1.0,
         };
         
         processor.update_sampling_rate(44100.0);
@@ -92,55 +83,38 @@ impl RProcessor {
         }
     }
 
-    pub fn pitch_bend(&mut self, pitch_bend: u16) {
+    pub fn update_pitch_bend_multiplier(&mut self, pitch_bend: u16) {
+        // center pitch_bend around 0 (easier to read)
+        let bend = (pitch_bend as f32) - 8192.0;
 
-        let bend = (pitch_bend as i16) - 8192;
-        
+        // how many semitones we're bending (a fraction of the pitch_bend_limit)
+        let semitones;
+
+        // bending up (1 <= bend <= 8191)
+        if bend > 0.0 {
+            semitones = (4.0) * (bend / 8191.0);
+
         // no bend
-        if bend == 0 {
-            return
-        
-        // bending up
-        } else if bend > 0 {
+        } else if bend == 0.0 {
+            semitones = 0.0;
 
-            let bend = (bend as f32) / 8191.0;
-
-
-
-            for voice in &mut self.voices {
-                if voice.is_on {
-                    
-                }
-            }
-
-        // bending down
+        // bending down (-8192 <= bend <= -1)
         } else {
-
+            semitones = (4.0) * (bend / 8192.0);
         }
+
+        // what we multiply by our base frequency to bend it however many semitones we want
+        self.pitch_bend_multiplier = 2.0_f32.powf(semitones / 12.0);
     }
     
     pub fn process(&mut self) -> f32 {
 
-        // unlock parameters
-        let wave_lock = self.params.wave.lock().unwrap();
-        let wave = wave_lock.clone();
-        drop(wave_lock);
-
-        let attack_lock = self.params.attack.lock().unwrap();
-        let attack = attack_lock.clone();
-        drop(attack_lock);
-        
-        let decay_lock = self.params.decay.lock().unwrap();
-        let decay = decay_lock.clone();
-        drop(decay_lock);
-
-        let sustain_lock = self.params.sustain.lock().unwrap();
-        let sustain = sustain_lock.clone();
-        drop(sustain_lock);
-
-        let release_lock = self.params.release.lock().unwrap();
-        let release = release_lock.clone();
-        drop(release_lock);
+        // get parameters
+        let wave = self.params.wave();
+        let attack = self.params.attack();
+        let decay = self.params.decay();
+        let sustain = self.params.sustain();
+        let release = self.params.release();
         
         let mut val = 0.0;
         
@@ -152,6 +126,9 @@ impl RProcessor {
                 voice.envelope.sustain = sustain;
                 voice.envelope.release = ms_to_samples(release, self.sample_rate);
             }
+
+            // apply frequency modulation
+            voice.multiply_frequency(self.pitch_bend_multiplier);
 
             // process
             val += self.volume * voice.process(wave);

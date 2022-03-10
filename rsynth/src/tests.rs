@@ -6,46 +6,38 @@ fn ms_to_samples(time: f32, sample_rate: f32) -> u32 {
     (sample_rate * time / 1000.0) as u32
 }
 
-#[test]
-fn parameters_loading() {
-    let params1 = Arc::new(params::RParams::default());
+pub fn pitch_bend(pitch_bend: u16) -> f32 {
+    // center pitch_bend around 0 (easier to read)
+    let bend = (pitch_bend as f32) - 8192.0;
 
-    let params = params1.clone();
+    // get the pitch_bend_limit parameter
+    let pb_limit: u8 = 12;
 
-    let attack_lock = params.attack.lock().unwrap();
-    let attack = attack_lock.clone();
-    drop(attack_lock);
-    
-    let decay_lock = params.decay.lock().unwrap();
-    let decay = decay_lock.clone();
-    drop(decay_lock);
+    // how many semitones we're bending (a fraction of the pitch_bend_limit)
+    let semitones;
 
-    let sustain_lock = params.sustain.lock().unwrap();
-    let sustain = sustain_lock.clone();
-    drop(sustain_lock);
+    // bending up (1 <= bend <= 8191)
+    if bend > 0.0 {
+        semitones = (pb_limit as f32) * (bend / 8191.0);
 
-    let release_lock = params.release.lock().unwrap();
-    let release = release_lock.clone();
-    drop(release_lock);
+    // no bend
+    } else if bend == 0.0 {
+        semitones = 0.0;
 
-    println!("{}", ms_to_samples(attack, 44100.0));
-    println!("{}", ms_to_samples(decay, 44100.0));
-    println!("{}", sustain);
-    println!("{}", ms_to_samples(release, 44100.0));
+    // bending down (-8192 <= bend <= -1)
+    } else {
+        semitones = (pb_limit as f32) * (bend / 8192.0);
+    }
+
+    // what we multiply by our base frequency to bend it however many semitones we want
+    let multiplier = 2.0_f32.powf(semitones / 12.0);
+
+    return 440.0 * multiplier;
 }
 
 #[test]
-fn bit_shift_test() {
+fn test_pitch_bend() {
+    let f = pitch_bend(12771);
 
-    let data: [u8; 3] = [0b01101011, 0b01101011, 0b11111111];
-
-    let n1 = data[1] as u16;
-    let n2 = data[2] as u16;
-    let n3 = n2 << 8;
-
-    let n4 = n1 | n3;
-
-
-    let binary = format!("{:#b}", n4);
-    println!("{}", binary);
+    println!("{}", f);
 }
