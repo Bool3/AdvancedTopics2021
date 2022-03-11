@@ -1,7 +1,8 @@
 
 use std::sync::Mutex;
 
-use vst::plugin::PluginParameters;
+use vst::plugin::{HostCallback, PluginParameters};
+use vst::host::Host;
 
 use crate::wave::Wave;
 
@@ -18,14 +19,15 @@ const PITCH_BEND_LIMIT_MIN: u8 = 1;
 const PITCH_BEND_LIMIT_MAX: u8 = 84;
 
 
-#[derive(Debug)]
 pub struct RParams {
-    pub wave: Mutex<Wave>,
-    pub attack: Mutex<f32>,
-    pub decay: Mutex<f32>,
-    pub sustain: Mutex<f32>,
-    pub release: Mutex<f32>,
-    pub pitch_bend_limit: Mutex<u8>,
+    pub host: HostCallback,     // included for logging purposes
+    wave: Mutex<Wave>,
+    attack: Mutex<f32>,
+    decay: Mutex<f32>,
+    sustain: Mutex<f32>,
+    release: Mutex<f32>,
+    pitch_bend_limit: Mutex<u8>,
+    log: Mutex<f32>,
 }
 
 impl RParams {
@@ -76,18 +78,31 @@ impl RParams {
 
         return pb_limit;
     }
+
+    pub fn log(&self, number: f32) {
+        let mut log_lock = self.log.lock().unwrap();
+
+        *log_lock = number;
+        
+        drop(log_lock);
+        
+        // ABSOLUTELY NECESSARY
+        self.host.update_display();
+    }
 }
 
 
 impl Default for RParams {
     fn default() -> RParams {
         return RParams {
+            host: HostCallback::default(),
             wave: Mutex::new(Wave::Sine),
             attack: Mutex::new(ATTACK_MIN),
             decay: Mutex::new(DECAY_MIN),
             sustain: Mutex::new(0.5),
             release: Mutex::new(RELEASE_MIN),
             pitch_bend_limit: Mutex::new(PITCH_BEND_LIMIT_MIN),
+            log: Mutex::new(3.0),
         }
     }
 }
@@ -129,6 +144,10 @@ impl PluginParameters for RParams {
                 let pb_limit = self.pitch_bend_limit.lock().unwrap();
                 return pb_limit.to_string();
             },
+            6 => {
+                let log = self.log.lock().unwrap();
+                return log.to_string();
+            },
             _ => return String::from("UNKNOWN")
         }
     }
@@ -141,7 +160,8 @@ impl PluginParameters for RParams {
             3 => String::from("Sustain"),
             4 => String::from("Release"),
             5 => String::from("Pitch Bend Limit"),
-            _ => String::from("UNKNOWN")
+            6 => String::from("Log"),
+            _ => String::from("UNKNOWN"),
         }
     }
 

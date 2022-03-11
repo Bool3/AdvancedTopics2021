@@ -108,7 +108,6 @@ impl Osc {
                     // we sample the blep function at a fraction of its length (PI)
                     // that fraction being the phase / blep_splice_length : [0, 1]
                     // (remember: the blep_splice_length is some multiple of the phase_increment)
-                    // divide by BLEP_MAX to keep values between -1 and 1
                     blep_up(self.phase / self.blep_splice_length * PI)
                 
                 // between upwards discontinuity and downwards discontinuity

@@ -6,7 +6,7 @@ use vst::{
     buffer::AudioBuffer, 
     api::{Events, Supported}, 
     event::Event, 
-    editor::Editor
+    editor::Editor, host::Host
 };
 
 mod wave;
@@ -20,7 +20,7 @@ mod osc;
 mod tests;
 
 #[derive(Default)]
-struct RSynth {
+pub struct RSynth {
     host: HostCallback,
     params: Arc<params::RParams>,
     processors: Vec<processor::RProcessor>
@@ -29,7 +29,11 @@ struct RSynth {
 impl Plugin for RSynth {
     
     fn new(host: HostCallback) -> RSynth {
-        let params = Arc::new(params::RParams::default());
+        
+        let mut p = params::RParams::default();
+        p.host = host;
+
+        let params = Arc::new(p);
         
         let mut processors = Vec::new();
         
@@ -37,11 +41,11 @@ impl Plugin for RSynth {
             processors.push(processor::RProcessor::new(params.clone()));
         }
         
-        return RSynth {
+        return RSynth { 
             host,
             params,
-            processors,
-        }
+            processors
+        };
     }
     
     fn get_info(&self) -> vst::plugin::Info {
@@ -57,7 +61,7 @@ impl Plugin for RSynth {
             inputs: 2,
             outputs: 2,
             
-            parameters: 6,
+            parameters: 7,
             
             
             ..Default::default()

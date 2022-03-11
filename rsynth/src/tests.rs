@@ -11,7 +11,7 @@ pub fn pitch_bend(pitch_bend: u16) -> f32 {
     let bend = (pitch_bend as f32) - 8192.0;
 
     // get the pitch_bend_limit parameter
-    let pb_limit: u8 = 12;
+    let pb_limit: u8 = 1;
 
     // how many semitones we're bending (a fraction of the pitch_bend_limit)
     let semitones;
@@ -37,7 +37,7 @@ pub fn pitch_bend(pitch_bend: u16) -> f32 {
 
 #[test]
 fn test_pitch_bend() {
-    let f = pitch_bend(12771);
+    let f = pitch_bend(16383);
 
     println!("{}", f);
 }
