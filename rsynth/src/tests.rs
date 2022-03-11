@@ -41,3 +41,25 @@ fn test_pitch_bend() {
 
     println!("{}", f);
 }
+
+#[test]
+fn test_bit_shift() {
+
+    let data: [u8; 3] = [1, 0b01111111, 0b01111111];
+
+    let least_significant = data[1] as u16;
+    println!("{:#b}", least_significant);
+
+    let most_significant = data[2] as u16;
+    println!("{:#b}", most_significant);
+
+    let msig_shifted = most_significant << 7;
+    println!("{:#b}", msig_shifted);
+
+    let pitch_bend = least_significant | msig_shifted;
+
+    println!("{:#b}", pitch_bend);
+
+    println!("{}", pitch_bend);
+
+}

@@ -29,7 +29,7 @@ pub struct RSynth {
 impl Plugin for RSynth {
     
     fn new(host: HostCallback) -> RSynth {
-        
+
         let mut p = params::RParams::default();
         p.host = host;
 
@@ -117,11 +117,13 @@ impl Plugin for RSynth {
                         // pitch bend
                         224 => {
                             // we need to combine the data (two u8) into one u16
-                            // note: the actual value has the bounds of a u14
+                            // note: in actuality, MIDI does not use the most siginifcant bit
+                            //       so we are really combining two u7 into one u14
+                            //       thus, we only bit shift by 7 instead of 8
                             let least_significant = val.data[1] as u16;
                             let most_significant = val.data[2] as u16;
 
-                            let msig_shifted = most_significant << 8;
+                            let msig_shifted = most_significant << 7;
 
                             let pitch_bend = least_significant | msig_shifted;
 

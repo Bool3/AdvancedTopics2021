@@ -84,6 +84,8 @@ impl RProcessor {
 
     pub fn update_pitch_bend_multiplier(&mut self, pitch_bend: u16) {
 
+        self.params.log(pitch_bend as f32);
+
         // center pitch_bend around 0 (easier to read)
         let bend = (pitch_bend as f32) - 8192.0;
 
@@ -92,7 +94,7 @@ impl RProcessor {
 
         // bending up (1 <= bend <= 8191)
         if bend > 0.0 {
-            semitones = 1.0 * (bend / 8191.0);
+            semitones = (self.params.pitch_bend_limit() as f32) * (bend / 8191.0);
 
         // no bend
         } else if bend == 0.0 {
@@ -100,7 +102,7 @@ impl RProcessor {
 
         // bending down (-8192 <= bend <= -1)
         } else {
-            semitones = 1.0 * (bend / 8192.0);
+            semitones = (self.params.pitch_bend_limit() as f32) * (bend / 8192.0);
         }
 
         // what we multiply by our base frequency to bend it however many semitones we want
