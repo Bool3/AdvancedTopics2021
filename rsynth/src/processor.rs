@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{voice::RVoice, params::RParams};
+use crate::{voice::RVoice, params::RParams, osc::Osc, route::Route};
 
 fn ms_to_samples(time: f32, sample_rate: f32) -> u32 {
     (sample_rate * time / 1000.0) as u32
@@ -9,6 +9,7 @@ fn ms_to_samples(time: f32, sample_rate: f32) -> u32 {
 pub struct RProcessor {
     sample_rate: f32,
     voices: Vec<RVoice>,
+    lfo: Osc,
     params: Arc<RParams>,
     volume: f32,
     pitch_bend_multiplier: f32,
@@ -40,19 +41,22 @@ impl RProcessor {
         let mut processor = RProcessor {
             sample_rate: 44100.0,
             voices,
+            lfo: Osc::new(0.0, 44100.0),
             params,
             volume: 0.125,
             pitch_bend_multiplier: 1.0,
         };
         
-        processor.update_sampling_rate(44100.0);
+        processor.update_sample_rate(44100.0);
         
         return processor;
     }
     
-    pub fn update_sampling_rate(&mut self, sample_rate: f32) {
+    pub fn update_sample_rate(&mut self, sample_rate: f32) {
         self.sample_rate = sample_rate;
-            
+        
+        self.lfo.update_sample_rate(sample_rate);
+
         for voice in &mut self.voices {
             voice.update_sample_rate(sample_rate);
         }
@@ -84,8 +88,6 @@ impl RProcessor {
 
     pub fn update_pitch_bend_multiplier(&mut self, pitch_bend: u16) {
 
-        self.params.log(pitch_bend as f32);
-
         // center pitch_bend around 0 (easier to read)
         let bend = (pitch_bend as f32) - 8192.0;
 
@@ -113,14 +115,45 @@ impl RProcessor {
 
         // get parameters
         let wave = self.params.wave();
+
         let attack = self.params.attack();
         let decay = self.params.decay();
         let sustain = self.params.sustain();
         let release = self.params.release();
-        
+
+        let lfo_frequency = self.params.lfo_frequency();
+        let lfo_wave = self.params.lfo_wave();
+        let lfo_intensity = self.params.lfo_intensity();
+        let lfo_route = self.params.lfo_route();
+
+        // update and process LFO
+        self.lfo.update_frequency(lfo_frequency);
+        let lfo_val = self.lfo.process(lfo_wave);
+
+        // declare and set the lfo's multipilers
+        let lfo_frequency_multiplier: f32;  // used for frequency modulation
+        let lfo_amplitude_multiplier: f32;  // used for amplitude modulation
+
+        match lfo_route {
+            Route::None => {
+                lfo_frequency_multiplier = 1.0;
+                lfo_amplitude_multiplier = 1.0;
+            },
+            Route::Frequency => {
+                lfo_frequency_multiplier = 1.0 + lfo_val * lfo_intensity;
+                lfo_amplitude_multiplier = 1.0;
+            },
+            Route::Amplitude => {
+                lfo_frequency_multiplier = 1.0;
+                lfo_amplitude_multiplier = ((lfo_val / 2.0 + 0.5) * lfo_intensity) + (1.0 - lfo_intensity);
+            }
+        };
+
         let mut val = 0.0;
-        
+
+        // process voices
         for voice in &mut self.voices {
+
             // set adsr (only if envelope is finished)
             if voice.envelope.is_done {
                 voice.envelope.attack = ms_to_samples(attack, self.sample_rate);
@@ -130,11 +163,14 @@ impl RProcessor {
             }
 
             // apply frequency modulation
-            voice.multiply_frequency(self.pitch_bend_multiplier);
+            voice.multiply_frequency(self.pitch_bend_multiplier * lfo_frequency_multiplier);
 
             // process
             val += self.volume * voice.process(wave);
         }
+
+        // apply amplitude modulation
+        val *= lfo_amplitude_multiplier;
 
         return val;
     }

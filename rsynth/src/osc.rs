@@ -47,17 +47,17 @@ impl Osc {
         
         return new_osc;
     }
-    
+
     pub fn reset(&mut self) {
         self.phase = 0.0;
     }
-
+    
     pub fn update_frequency(&mut self, frequency: f32) {
         self.frequency = frequency;
 
         self.update_phase_increment();
     }
-
+    
     pub fn update_sample_rate(&mut self, sample_rate: f32) {
         self.sample_rate = sample_rate;
 
@@ -71,7 +71,7 @@ impl Osc {
         self.update_blep_splice_length();
     }
 
-    pub fn update_blep_splice_sample_length(&mut self, sample_length: f32) {
+    fn update_blep_splice_sample_length(&mut self, sample_length: f32) {
         self.blep_splice_sample_length = sample_length;
 
         self.update_blep_splice_length();
@@ -80,6 +80,14 @@ impl Osc {
     fn update_blep_splice_length(&mut self) {
         // note: sample 0 is included, so the blep splice is really +1 samples long
         self.blep_splice_length = self.phase_increment * self.blep_splice_sample_length;
+    }
+
+    fn increment_phase(&mut self) {
+        self.phase += self.phase_increment;
+
+        if self.phase > TWO_PI {
+            self.phase -= TWO_PI;
+        }
     }
     
     pub fn process(&mut self, wave: Wave) -> f32 {
@@ -140,15 +148,8 @@ impl Osc {
 
         self.increment_phase();
         
-        return self.normalize(val, wave);
-    }
-
-    fn increment_phase(&mut self) {
-        self.phase += self.phase_increment;
-
-        if self.phase > TWO_PI {
-            self.phase -= TWO_PI;
-        }
+        //return self.normalize(val, wave);
+        return val;
     }
 
     fn normalize(&self, val: f32, wave: Wave) -> f32 {

@@ -15,6 +15,7 @@ mod processor;
 mod voice;
 mod adsr;
 mod osc;
+mod route;
 
 #[cfg(test)]
 mod tests;
@@ -61,7 +62,7 @@ impl Plugin for RSynth {
             inputs: 2,
             outputs: 2,
             
-            parameters: 7,
+            parameters: 11,
             
             
             ..Default::default()
@@ -85,7 +86,7 @@ impl Plugin for RSynth {
     
     fn set_sample_rate(&mut self, rate: f32) {
         for processor in &mut self.processors {
-            processor.update_sampling_rate(rate);
+            processor.update_sample_rate(rate);
         }
     }
     

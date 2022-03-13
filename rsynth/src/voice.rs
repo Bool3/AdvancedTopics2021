@@ -8,7 +8,7 @@ pub struct RVoice {
     sample_rate: f32,
     pub note: u8,
     pub is_on: bool,
-
+    
     oscillator: Osc,
     pub envelope: Adsr,
 }

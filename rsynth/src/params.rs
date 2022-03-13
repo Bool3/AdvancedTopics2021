@@ -4,7 +4,7 @@ use std::sync::Mutex;
 use vst::plugin::{HostCallback, PluginParameters};
 use vst::host::Host;
 
-use crate::wave::Wave;
+use crate::{wave::Wave, route::Route};
 
 const ATTACK_MIN: f32 = 10.0;
 const ATTACK_MAX: f32 = 4000.0;
@@ -18,16 +18,26 @@ const RELEASE_MAX: f32 = 4000.0;
 const PITCH_BEND_LIMIT_MIN: u8 = 1;
 const PITCH_BEND_LIMIT_MAX: u8 = 84;
 
+const LFO_FREQUENCY_MAX: f32 = 20.0;
 
 pub struct RParams {
-    pub host: HostCallback,     // included for logging purposes
-    wave: Mutex<Wave>,
-    attack: Mutex<f32>,
-    decay: Mutex<f32>,
-    sustain: Mutex<f32>,
-    release: Mutex<f32>,
-    pitch_bend_limit: Mutex<u8>,
-    log: Mutex<f32>,
+    pub host: HostCallback,         // included for logging purposes
+    
+    wave: Mutex<Wave>,              // 0
+    
+    attack: Mutex<f32>,             // 1
+    decay: Mutex<f32>,              // 2
+    sustain: Mutex<f32>,            // 3
+    release: Mutex<f32>,            // 4
+
+    pitch_bend_limit: Mutex<u8>,    // 5
+
+    log: Mutex<f32>,                // 6
+
+    lfo_frequency: Mutex<f32>,      // 7
+    lfo_wave: Mutex<Wave>,          // 8
+    lfo_intensity: Mutex<f32>,      // 9
+    lfo_route: Mutex<Route>,        // 10
 }
 
 impl RParams {
@@ -89,6 +99,38 @@ impl RParams {
         // ABSOLUTELY NECESSARY
         self.host.update_display();
     }
+
+    pub fn lfo_frequency(&self) -> f32 {
+        let lfo_frequency_lock = self.lfo_frequency.lock().unwrap();
+        let lfo_frequency = lfo_frequency_lock.clone();
+        drop(lfo_frequency_lock);
+
+        return lfo_frequency;
+    }
+
+    pub fn lfo_wave(&self) -> Wave {
+        let lfo_wave_lock = self.lfo_wave.lock().unwrap();
+        let lfo_wave = lfo_wave_lock.clone();
+        drop(lfo_wave_lock);
+
+        return lfo_wave;
+    }
+
+    pub fn lfo_intensity(&self) -> f32 {
+        let lfo_intensity_lock = self.lfo_intensity.lock().unwrap();
+        let lfo_intensity = lfo_intensity_lock.clone();
+        drop(lfo_intensity_lock);
+
+        return lfo_intensity;
+    }
+
+    pub fn lfo_route(&self) -> Route {
+        let lfo_route_lock = self.lfo_route.lock().unwrap();
+        let lfo_route = lfo_route_lock.clone();
+        drop(lfo_route_lock);
+
+        return lfo_route;
+    }
 }
 
 
@@ -96,13 +138,22 @@ impl Default for RParams {
     fn default() -> RParams {
         return RParams {
             host: HostCallback::default(),
+
             wave: Mutex::new(Wave::Sine),
+
             attack: Mutex::new(ATTACK_MIN),
             decay: Mutex::new(DECAY_MIN),
             sustain: Mutex::new(0.5),
             release: Mutex::new(RELEASE_MIN),
+
             pitch_bend_limit: Mutex::new(PITCH_BEND_LIMIT_MIN),
+
             log: Mutex::new(3.0),
+
+            lfo_frequency: Mutex::new(0.0),
+            lfo_wave: Mutex::new(Wave::Sine),
+            lfo_intensity: Mutex::new(0.0),
+            lfo_route: Mutex::new(Route::None),
         }
     }
 }
@@ -110,11 +161,12 @@ impl Default for RParams {
 impl PluginParameters for RParams {
     fn get_parameter_label(&self, index: i32) -> String {
         match index {
-            0 => String::from(""),
+            0 | 8 | 9 | 10 => String::from(""),
             1 | 2 | 4 => String::from("ms"),
             3 => String::from("%velocity"),
             5 => String::from("semitones"),
-            _ => String::from("UNKNOWN")
+            7 => String::from("Hz"),
+            _ => String::from("UNKNOWN"),
         }
     }
     
@@ -148,6 +200,22 @@ impl PluginParameters for RParams {
                 let log = self.log.lock().unwrap();
                 return log.to_string();
             },
+            7 => {
+                let lfo_frequency = self.lfo_frequency.lock().unwrap();
+                return lfo_frequency.to_string();
+            },
+            8 => {
+                let lfo_wave = self.lfo_wave.lock().unwrap();
+                return lfo_wave.to_string();
+            },
+            9 => {
+                let lfo_intensity = self.lfo_intensity.lock().unwrap();
+                return lfo_intensity.to_string();
+            },
+            10 => {
+                let lfo_route = self.lfo_route.lock().unwrap();
+                return lfo_route.to_string();
+            }
             _ => return String::from("UNKNOWN")
         }
     }
@@ -161,6 +229,10 @@ impl PluginParameters for RParams {
             4 => String::from("Release"),
             5 => String::from("Pitch Bend Limit"),
             6 => String::from("Log"),
+            7 => String::from("LFO Frequency"),
+            8 => String::from("LFO Wave"),
+            9 => String::from("LFO Intensity"),
+            10 => String::from("LFO Route"),
             _ => String::from("UNKNOWN"),
         }
     }
@@ -191,6 +263,22 @@ impl PluginParameters for RParams {
                 let pb_limit = self.pitch_bend_limit.lock().unwrap();
                 return (pb_limit.clone() as f32) / (PITCH_BEND_LIMIT_MAX as f32);
             },
+            7 => {
+                let lfo_frequency = self.lfo_frequency.lock().unwrap();
+                return lfo_frequency.clone() / LFO_FREQUENCY_MAX;
+            },
+            8 => {
+                let lfo_wave = self.lfo_wave.lock().unwrap();
+                return lfo_wave.to_f32();
+            },
+            9 => {
+                let lfo_intensity = self.lfo_intensity.lock().unwrap();
+                return lfo_intensity.clone();
+            },
+            10 => {
+                let lfo_route = self.lfo_route.lock().unwrap();
+                return lfo_route.to_f32();
+            }
             _ => return 0.0
         }
     }
@@ -245,6 +333,22 @@ impl PluginParameters for RParams {
                     *pb_limit = PITCH_BEND_LIMIT_MIN;
                 }
             },
+            7 => {
+                let mut lfo_frequency = self.lfo_frequency.lock().unwrap();
+                *lfo_frequency = value * LFO_FREQUENCY_MAX;
+            },
+            8 => {
+                let mut lfo_wave = self.lfo_wave.lock().unwrap();
+                *lfo_wave = Wave::from_f32(value);
+            },
+            9 => {
+                let mut lfo_intensity = self.lfo_intensity.lock().unwrap();
+                *lfo_intensity = value;
+            },
+            10 => {
+                let mut lfo_route = self.lfo_route.lock().unwrap();
+                *lfo_route = Route::from_f32(value);
+            },
             _ => {}
         }
     }
@@ -255,6 +359,20 @@ impl PluginParameters for RParams {
                 let mut wave = self.wave.lock().unwrap();
                 
                 *wave = Wave::from_string(text);
+                
+                return true
+            },
+            8 => {
+                let mut lfo_wave = self.lfo_wave.lock().unwrap();
+
+                *lfo_wave = Wave::from_string(text);
+                
+                return true
+            },
+            10 => {
+                let mut lfo_route = self.lfo_route.lock().unwrap();
+
+                *lfo_route = Route::from_string(text);
                 
                 return true
             },

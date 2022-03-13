@@ -16,10 +16,10 @@ impl Default for Wave {
 impl Wave {
     pub fn to_string(&self) -> String {
         match self {
-            Wave::Sine => return String::from("Sine"),
-            Wave::Triangle => return String::from("Triangle"),
-            Wave::Square => return String::from("Square"),
-            Wave::Saw => return String::from("Saw"),
+            Wave::Sine => String::from("Sine"),
+            Wave::Triangle => String::from("Triangle"),
+            Wave::Square => String::from("Square"),
+            Wave::Saw => String::from("Saw"),
         }
     }
     
@@ -35,20 +35,20 @@ impl Wave {
     
     pub fn to_f32(&self) -> f32 {
         match self {
-            Wave::Sine => return 0.0f32,
-            Wave::Triangle => return 0.25f32,
-            Wave::Square => return 0.5f32,
-            Wave::Saw => return 0.75f32,
+            Wave::Sine => 0.0,
+            Wave::Triangle => 0.25,
+            Wave::Square => 0.5,
+            Wave::Saw => 0.75,
         }
     }
     
     pub fn from_f32(val: f32) -> Wave {
         match val {
-            0.0f32 => return Wave::Sine,
-            0.25f32 => return Wave::Triangle,
-            0.5f32 => return Wave::Square,
-            0.75f32 => return Wave::Saw,
-            _ => return Wave::Sine,
+            v if v == 0.0 => Wave::Sine,
+            v if v == 0.25 => Wave::Triangle,
+            v if v == 0.5 => Wave::Square,
+            v if v == 0.75 => Wave::Saw,
+            _ => Wave::Sine,
         }
     }
 }
