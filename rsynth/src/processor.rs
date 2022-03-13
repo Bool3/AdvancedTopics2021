@@ -134,6 +134,14 @@ impl RProcessor {
         let lfo_frequency_multiplier: f32;  // used for frequency modulation
         let lfo_amplitude_multiplier: f32;  // used for amplitude modulation
 
+        /*
+        lfo_val : [-1, 1]
+        intensity : [0, 1]
+
+        FM:  f_new = f + f * lfo_val * intensity
+        AM:  val_new = val * ( (lfo_val / 2 + 0.5) * intensity + (1 - intensity) )
+        */
+
         match lfo_route {
             Route::None => {
                 lfo_frequency_multiplier = 1.0;
@@ -145,7 +153,16 @@ impl RProcessor {
             },
             Route::Amplitude => {
                 lfo_frequency_multiplier = 1.0;
-                lfo_amplitude_multiplier = ((lfo_val / 2.0 + 0.5) * lfo_intensity) + (1.0 - lfo_intensity);
+
+                // transform the wave so that it oscillates between 0 and 1
+                let lfo_val_transformed = lfo_val / 2.0 + 0.5;
+
+                // It's not enough to just multiply the wave by the intensity like in FM,
+                // as the intensity grows from 0 -> 1, the wave grows in that same fashion.
+                // What we want instead is the wave to "grow" from 1 -> 0.
+                // The desired result is to dip from a multiplier of 1, instead of rise from a multiplier of 0.
+                // Thus, we need to add (1.0 - intensity) to the wave.
+                lfo_amplitude_multiplier = (lfo_val_transformed * lfo_intensity) + (1.0 - lfo_intensity);
             }
         };
 
