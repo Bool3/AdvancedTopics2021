@@ -3,11 +3,11 @@
 <JUCERPROJECT id="KTMUew" name="JSynth" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
               projectLineFeed="&#10;" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              pluginFormats="buildVST3" pluginAAXCategory="2048" pluginName="JSynth"
-              pluginDesc="JSynth" pluginManufacturer="stork" pluginManufacturerCode="Stor"
-              pluginCode="JSyn" pluginVSTCategory="kPlugCategSynth" companyName="stork"
-              companyCopyright="c" companyWebsite="storkstuff" companyEmail="morestorkstuff"
-              pluginVST3Category="Instrument">
+              pluginFormats="buildStandalone,buildVST3" pluginAAXCategory="2048"
+              pluginName="JSynth" pluginDesc="JSynth" pluginManufacturer="stork"
+              pluginManufacturerCode="Stor" pluginCode="JSyn" pluginVSTCategory="kPlugCategSynth"
+              companyName="stork" companyCopyright="c" companyWebsite="storkstuff"
+              companyEmail="morestorkstuff" pluginVST3Category="Instrument">
   <MAINGROUP id="tNUQ9r" name="JSynth">
     <GROUP id="{2A7D0527-7675-B86C-F789-267692BDDCEC}" name="Source">
       <GROUP id="{807F94D4-E39A-5750-863B-0B3767314CDB}" name="Editor"/>

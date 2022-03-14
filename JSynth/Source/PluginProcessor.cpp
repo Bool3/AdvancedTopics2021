@@ -6,6 +6,8 @@
   ==============================================================================
 */
 
+#include <random>
+
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
@@ -137,7 +139,7 @@ void JSynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+        buffer.clear(i, 0, buffer.getNumSamples());
 
 
     for (const auto metadata : midiMessages) {
@@ -160,13 +162,13 @@ void JSynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel) {
-        auto* channelData = buffer.getWritePointer(channel);
-
+    for (int channel = 0; channel < totalNumOutputChannels; channel++) {
         for (int i = 0; i < buffer.getNumSamples(); i++) {
-            channelData[i] = processors[channel]->process();
+            buffer.setSample(channel, i, processors[channel]->process());
         }
         // ..do something to the data...
+
+        
     }
 }
 
