@@ -51,6 +51,12 @@ void JVoice::releaseEnvelope() {
 	envelope->startRelease();
 }
 
+void JVoice::multiplyFrequency(float multiplier) {
+	float newFrequency = noteToFrequency(note) * multiplier;
+
+	oscillator->updateFrequency(newFrequency);
+}
+
 float JVoice::process(Wave wave) {
 	float val = 0.0;
 

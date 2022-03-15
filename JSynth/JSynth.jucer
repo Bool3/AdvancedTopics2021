@@ -20,7 +20,7 @@
         <FILE id="BFfiXM" name="JProcessor.h" compile="0" resource="0" file="Source/Processor/JProcessor.h"/>
         <FILE id="GCwVPi" name="JVoice.cpp" compile="1" resource="0" file="Source/Processor/JVoice.cpp"/>
         <FILE id="cr6Bdq" name="JVoice.h" compile="0" resource="0" file="Source/Processor/JVoice.h"/>
-        <FILE id="VKcQ1O" name="Wave.cpp" compile="1" resource="0" file="Source/Processor/Wave.cpp"/>
+        <FILE id="mC7Foz" name="Route.h" compile="0" resource="0" file="Source/Processor/Route.h"/>
         <FILE id="zEZr9L" name="Wave.h" compile="0" resource="0" file="Source/Processor/Wave.h"/>
       </GROUP>
       <FILE id="ZT73bk" name="PluginProcessor.cpp" compile="1" resource="0"

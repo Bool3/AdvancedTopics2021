@@ -4,6 +4,7 @@
 #include "../PluginProcessor.h"
 
 #include "JVoice.h"
+#include "Route.h"
 
 unsigned int msToSamples(float time, float sampleRate) {
 	return (unsigned int)(sampleRate * time / 1000.0);
@@ -25,6 +26,10 @@ JProcessor::JProcessor(JSynthAudioProcessor& p) : audioProcessor(p) {
 
 		voices->push_back(voice);
 	}
+
+	lfo = new JOsc(0.0, 44100.0);
+
+	pitchBendMultiplier = 1.0;
 }
 
 JProcessor::~JProcessor() {
@@ -34,6 +39,8 @@ JProcessor::~JProcessor() {
 
 void JProcessor::updateSampleRate(float newSampleRate) {
 	sampleRate = newSampleRate;
+
+	lfo->updateSampleRate(sampleRate);
 
 	for (int i = 0; i < voices->size(); i++) {
 		voices->at(i)->updateSampleRate(sampleRate);
@@ -69,6 +76,22 @@ void JProcessor::noteOff(char note) {
 	}
 }
 
+void JProcessor::updatePitchBendMultiplier(int pitchBend) {
+	float bend = ((float)pitchBend) - 8192.0;
+
+	float semitones;
+
+	if (bend > 0.0) {
+		semitones = ((float)audioProcessor.pitchBendLimit->get()) * (bend / 8191.0);
+	} else if (bend == 0) {
+		semitones = 0.0;
+	} else {
+		semitones = ((float)audioProcessor.pitchBendLimit->get()) * (bend / 8192.0);
+	}
+
+	pitchBendMultiplier = std::powf(2.0, semitones / 12.0);
+}
+
 float JProcessor::process() {
 	float volume = audioProcessor.volume->get();
 	Wave wave = (Wave)audioProcessor.wave->getIndex();
@@ -77,6 +100,33 @@ float JProcessor::process() {
 	float sustain = audioProcessor.sustain->get();
 	float release = audioProcessor.release->get();
 
+	float lfoFrequency = audioProcessor.lfoFrequency->get();
+	Wave lfoWave = (Wave)audioProcessor.lfoWave->getIndex();
+	float lfoIntensity = audioProcessor.lfoIntensity->get();
+	Route lfoRoute = (Route)audioProcessor.lfoRoute->getIndex();
+
+	lfo->updateFrequency(lfoFrequency);
+	float lfoVal = lfo->process(lfoWave);
+
+	float lfoFrequencyMultiplier = 1.0;
+	float lfoAmplitudeMultiplier = 1.0;
+
+	float lfoValTransformed = 0.0;
+
+	switch (lfoRoute) {
+		case Route::None:
+			break;
+		case Route::Amplitude:
+			lfoValTransformed = (lfoVal / 2.0) + 0.5;
+
+			lfoAmplitudeMultiplier = (lfoValTransformed * lfoIntensity) + (1.0 - lfoIntensity);
+
+			break;
+		case Route::Frequency:
+			lfoFrequencyMultiplier = 1.0 + (lfoVal * lfoIntensity);
+
+			break;
+	}
 
 	float val = 0;
 
@@ -90,8 +140,12 @@ float JProcessor::process() {
 			voice->envelope->release = msToSamples(release, sampleRate);
 		}
 
+		voice->multiplyFrequency(pitchBendMultiplier * lfoFrequencyMultiplier);
+
 		val += volume * voice->process(wave);
 	}
+
+	val *= lfoAmplitudeMultiplier;
 
 	return val;
 }

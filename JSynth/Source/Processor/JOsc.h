@@ -15,9 +15,6 @@ public:
 
 	void updatePhaseIncrement();
 
-	void updateBlepSliceSampleLength(float sampleLength);
-	void updateBlepSliceLength();
-
 	float process(Wave wave);
 
 	void incrementPhase();
@@ -25,6 +22,10 @@ public:
 	float normalize(float val, Wave wave);
 
 private:
+
+	void updateBlepSliceSampleLength(float sampleLength);
+	void updateBlepSliceLength();
+
 	float sampleRate;
 	float frequency;
 

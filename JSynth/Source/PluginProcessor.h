@@ -55,11 +55,20 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
     juce::AudioParameterFloat* volume;
+
     juce::AudioParameterChoice* wave;
+
     juce::AudioParameterFloat* attack;
     juce::AudioParameterFloat* decay;
     juce::AudioParameterFloat* sustain;
     juce::AudioParameterFloat* release;
+
+    juce::AudioParameterInt* pitchBendLimit;
+
+    juce::AudioParameterFloat* lfoFrequency;
+    juce::AudioParameterChoice* lfoWave;
+    juce::AudioParameterFloat* lfoIntensity;
+    juce::AudioParameterChoice* lfoRoute;
 
 private:
 

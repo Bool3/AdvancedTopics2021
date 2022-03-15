@@ -27,11 +27,20 @@ JSynthAudioProcessor::JSynthAudioProcessor()
 #endif
 {
     volume = new juce::AudioParameterFloat("volume", "Volume", 0.0, 1.0, 0.125);
+
     wave = new juce::AudioParameterChoice("wave", "Wave", { "Sine", "Triangle", "Square", "Saw" }, 0);
+
     attack = new juce::AudioParameterFloat("attack", "Attack", 10.0, 4000.0, 10.0);
     decay = new juce::AudioParameterFloat("decay", "Decay", 10.0, 4000.0, 10.0);
     sustain = new juce::AudioParameterFloat("sustain", "Sustain", 0.0, 1.0, 0.5);
     release = new juce::AudioParameterFloat("release", "Release", 10.0, 4000.0, 10.0);
+
+    pitchBendLimit = new juce::AudioParameterInt("pitchBendLimit", "Pitch Bend Limit", 1, 64, 1);
+
+    lfoFrequency = new juce::AudioParameterFloat("lfoFrequency", "LFO Frequency", 0.0, 20.0, 0.0);
+    lfoWave = new juce::AudioParameterChoice("lfoWave", "LFO Wave", { "Sine", "Triangle", "Square", "Saw" }, 0);
+    lfoIntensity = new juce::AudioParameterFloat("lfoIntensity", "LFO Intensity", 0.0, 1.0, 0.0);
+    lfoRoute = new juce::AudioParameterChoice("lfoRoute", "LFO Route", { "None", "Amplitude", "Frequency"}, 0);
     
     addParameter(volume);
     addParameter(wave);
@@ -39,6 +48,11 @@ JSynthAudioProcessor::JSynthAudioProcessor()
     addParameter(decay);
     addParameter(sustain);
     addParameter(release);
+    addParameter(pitchBendLimit);
+    addParameter(lfoFrequency);
+    addParameter(lfoWave);
+    addParameter(lfoIntensity);
+    addParameter(lfoRoute);
 
     processors[0] = new JProcessor(*this);
     processors[1] = new JProcessor(*this);
@@ -152,6 +166,9 @@ void JSynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
         } else if (message.isNoteOff()) {
             processors[0]->noteOff(message.getNoteNumber());
             processors[1]->noteOff(message.getNoteNumber());
+        } else if (message.isPitchWheel()) {
+            processors[0]->updatePitchBendMultiplier(message.getPitchWheelValue());
+            processors[1]->updatePitchBendMultiplier(message.getPitchWheelValue());
         }
 
     }

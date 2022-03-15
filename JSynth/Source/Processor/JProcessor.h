@@ -15,6 +15,8 @@ public:
 	void noteOn(char note, char velocity);
 	void noteOff(char note);
 
+	void updatePitchBendMultiplier(int pitchBend);
+
 	float process();
 
 	void reset();
@@ -23,5 +25,7 @@ private:
 	float sampleRate;
 	JSynthAudioProcessor& audioProcessor;
 	std::vector<JVoice*>* voices;
+	JOsc* lfo;
+	float pitchBendMultiplier;
 
 };

@@ -21,6 +21,8 @@ public:
 
 	void releaseEnvelope();
 
+	void multiplyFrequency(float multiplier);
+
 	float process(Wave wave);
 
 	char note;
