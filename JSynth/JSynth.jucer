@@ -10,7 +10,16 @@
               companyEmail="morestorkstuff" pluginVST3Category="Instrument">
   <MAINGROUP id="tNUQ9r" name="JSynth">
     <GROUP id="{2A7D0527-7675-B86C-F789-267692BDDCEC}" name="Source">
-      <GROUP id="{807F94D4-E39A-5750-863B-0B3767314CDB}" name="Editor"/>
+      <GROUP id="{807F94D4-E39A-5750-863B-0B3767314CDB}" name="Editor">
+        <FILE id="DvWXia" name="Envelope.cpp" compile="1" resource="0" file="Source/Editor/Envelope.cpp"/>
+        <FILE id="cXbkeb" name="Envelope.h" compile="0" resource="0" file="Source/Editor/Envelope.h"/>
+        <FILE id="ePgtA5" name="Filters.cpp" compile="1" resource="0" file="Source/Editor/Filters.cpp"/>
+        <FILE id="rbukgI" name="Filters.h" compile="0" resource="0" file="Source/Editor/Filters.h"/>
+        <FILE id="iPbEf6" name="LFO.cpp" compile="1" resource="0" file="Source/Editor/LFO.cpp"/>
+        <FILE id="c6zX8B" name="LFO.h" compile="0" resource="0" file="Source/Editor/LFO.h"/>
+        <FILE id="MPZogD" name="Oscillators.cpp" compile="1" resource="0" file="Source/Editor/Oscillators.cpp"/>
+        <FILE id="BBhNti" name="Oscillators.h" compile="0" resource="0" file="Source/Editor/Oscillators.h"/>
+      </GROUP>
       <GROUP id="{F8716FBA-41AA-C9EB-0552-4FAFE0CA77B9}" name="Processor">
         <FILE id="eNYJUR" name="Adsr.cpp" compile="1" resource="0" file="Source/Processor/Adsr.cpp"/>
         <FILE id="xgfgHx" name="Adsr.h" compile="0" resource="0" file="Source/Processor/Adsr.h"/>
