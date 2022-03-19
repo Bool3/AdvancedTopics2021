@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::{voice::RVoice, params::RParams, osc::Osc, route::Route};
+use crate::{voice::RVoice, params::RParams, osc::Osc, route::Route, vcf::Vcf};
 
 fn ms_to_samples(time: f32, sample_rate: f32) -> u32 {
     (sample_rate * time / 1000.0) as u32
@@ -10,9 +10,11 @@ pub struct RProcessor {
     sample_rate: f32,
     voices: Vec<RVoice>,
     lfo: Osc,
+    vcf: Vcf,
     params: Arc<RParams>,
     volume: f32,
     pitch_bend_multiplier: f32,
+    val_log_counter: u32, // for logging purposes
 }
 
 impl RProcessor {
@@ -42,9 +44,11 @@ impl RProcessor {
             sample_rate: 44100.0,
             voices,
             lfo: Osc::new(0.0, 44100.0),
+            vcf: Vcf::new(44100.0),
             params,
             volume: 0.125,
             pitch_bend_multiplier: 1.0,
+            val_log_counter: 0,
         };
         
         processor.update_sample_rate(44100.0);
@@ -56,6 +60,7 @@ impl RProcessor {
         self.sample_rate = sample_rate;
         
         self.lfo.update_sample_rate(sample_rate);
+        self.vcf.update_sample_rate(sample_rate);
 
         for voice in &mut self.voices {
             voice.update_sample_rate(sample_rate);
@@ -126,6 +131,10 @@ impl RProcessor {
         let lfo_intensity = self.params.lfo_intensity();
         let lfo_route = self.params.lfo_route();
 
+        let cutoff_frequency = self.params.cutoff_frequency();
+        let q_factor = self.params.q_factor();
+        let filter_mode = self.params.filter_mode();
+
         // update and process LFO
         self.lfo.update_frequency(lfo_frequency);
         let lfo_val = self.lfo.process(lfo_wave);
@@ -189,6 +198,9 @@ impl RProcessor {
         // apply amplitude modulation
         val *= lfo_amplitude_multiplier;
 
+        // filter
+        val = self.vcf.svf(val, cutoff_frequency, q_factor, filter_mode);
+
         return val;
     }
     
@@ -196,5 +208,11 @@ impl RProcessor {
         for voice in &mut self.voices {
             voice.reset();
         }
+    }
+}
+
+impl Default for RProcessor {
+    fn default() -> RProcessor {
+        RProcessor::new(Arc::new(RParams::default()))
     }
 }

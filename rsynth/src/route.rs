@@ -32,11 +32,14 @@ impl Route {
     }
     
     pub fn from_f32(val: f32) -> Route {
-        match val {
-            v if v == 0.0 => Route::None,
-            v if v == 0.25 => Route::Frequency,
-            v if v == 0.5 => Route::Amplitude,
-            _ => Route::None,
+        if val < 0.25 {
+            return Route::None;
+
+        } else if val < 0.5 {
+            return Route::Frequency;
+            
+        } else {
+            return Route::Amplitude;
         }
     }
 }

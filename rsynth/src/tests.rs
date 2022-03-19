@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, collections::VecDeque};
 
 use crate::params;
 
@@ -61,5 +61,31 @@ fn test_bit_shift() {
     println!("{:#b}", pitch_bend);
 
     println!("{}", pitch_bend);
+
+}
+
+#[test]
+fn deque_test() {
+    let mut x = VecDeque::from([0, 0, 0, 0]);
+
+    x.push_front(3);
+    
+
+    x.push_front(2);
+    x.push_front(1);
+
+    println!("{:?}", &x);
+
+    x.push_front(4);
+
+    x.truncate(3);
+
+    println!("{:?}", &x);
+
+    x.push_front(5);
+
+    println!("{:?}", &x);
+
+    println!("{}", &x[1]);
 
 }

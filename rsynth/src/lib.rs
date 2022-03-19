@@ -16,6 +16,8 @@ mod voice;
 mod adsr;
 mod osc;
 mod route;
+mod vcf;
+mod filter_type;
 
 #[cfg(test)]
 mod tests;
@@ -24,7 +26,7 @@ mod tests;
 pub struct RSynth {
     host: HostCallback,
     params: Arc<params::RParams>,
-    processors: Vec<processor::RProcessor>
+    processor: processor::RProcessor,
 }
 
 impl Plugin for RSynth {
@@ -36,16 +38,12 @@ impl Plugin for RSynth {
 
         let params = Arc::new(p);
         
-        let mut processors = Vec::new();
-        
-        for _i in 0..2 {
-            processors.push(processor::RProcessor::new(params.clone()));
-        }
+        let processor = processor::RProcessor::new(params.clone());
         
         return RSynth { 
             host,
             params,
-            processors
+            processor
         };
     }
     
@@ -62,7 +60,7 @@ impl Plugin for RSynth {
             inputs: 2,
             outputs: 2,
             
-            parameters: 11,
+            parameters: 14,
             
             
             ..Default::default()
@@ -85,15 +83,11 @@ impl Plugin for RSynth {
     }
     
     fn set_sample_rate(&mut self, rate: f32) {
-        for processor in &mut self.processors {
-            processor.update_sample_rate(rate);
-        }
+        self.processor.update_sample_rate(rate);
     }
     
     fn suspend(&mut self) {
-        for processor in &mut self.processors {
-            processor.reset();
-        }
+        self.processor.reset();
     }
     
     fn process_events(&mut self, events: &Events) {
@@ -105,16 +99,14 @@ impl Plugin for RSynth {
                     match val.data[0] {
                         // note on
                         144 => {
-                            for processor in &mut self.processors {
-                                processor.note_on(val.data[1], val.data[2]);
-                            }
+                            self.processor.note_on(val.data[1], val.data[2]);
                         },
+
                         // note off
                         128 => {
-                            for processor in &mut self.processors {
-                                processor.note_off(val.data[1]);
-                            }
+                            self.processor.note_off(val.data[1]);
                         },
+
                         // pitch bend
                         224 => {
                             // we need to combine the data (two u8) into one u16
@@ -128,9 +120,7 @@ impl Plugin for RSynth {
 
                             let pitch_bend = least_significant | msig_shifted;
 
-                            for processor in &mut self.processors {
-                                processor.update_pitch_bend_multiplier(pitch_bend);
-                            }
+                            self.processor.update_pitch_bend_multiplier(pitch_bend);
                         },
                         _ => {}
                     }
@@ -143,15 +133,15 @@ impl Plugin for RSynth {
     
     fn process(&mut self, buffer: &mut AudioBuffer<f32>) {
         let (_, mut output) = buffer.split();
-        
-        let mut channel_number = 0;
-        
-        for channel in output.into_iter() {
-            for sample in channel {
-                *sample = self.processors[channel_number].process();
-            }
-            
-            channel_number += 1;
+
+        let channel_1 = output.get_mut(0);
+        let channel_2 = output.get_mut(1);
+
+        for i in 0..channel_1.len() {
+            let val = self.processor.process();
+
+            channel_1[i] = val;
+            channel_2[i] = val;
         }
     }
 }

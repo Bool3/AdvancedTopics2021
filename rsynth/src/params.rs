@@ -4,7 +4,7 @@ use std::sync::Mutex;
 use vst::plugin::{HostCallback, PluginParameters};
 use vst::host::Host;
 
-use crate::{wave::Wave, route::Route};
+use crate::{wave::Wave, route::Route, filter_type::FilterType};
 
 const ATTACK_MIN: f32 = 10.0;
 const ATTACK_MAX: f32 = 4000.0;
@@ -18,7 +18,14 @@ const RELEASE_MAX: f32 = 4000.0;
 const PITCH_BEND_LIMIT_MIN: u8 = 1;
 const PITCH_BEND_LIMIT_MAX: u8 = 84;
 
-const LFO_FREQUENCY_MAX: f32 = 20.0;
+const LFO_FREQUENCY_MAX: f32 = 500.0;
+
+const CUTOFF_FREQUENCY_MAX: f32 = 22050.0;
+
+// play with this number to get a good feel for the knob
+// higher number will make it more curved
+// should be a whole number
+const CUTOFF_EXPONENT_BASE: f32 = 10.0;
 
 pub struct RParams {
     pub host: HostCallback,         // included for logging purposes
@@ -38,6 +45,11 @@ pub struct RParams {
     lfo_wave: Mutex<Wave>,          // 8
     lfo_intensity: Mutex<f32>,      // 9
     lfo_route: Mutex<Route>,        // 10
+
+    cutoff_frequency: Mutex<f32>,   // 11 -- internally linear [0, 1]
+                                    //    -- exported exponentially [0 Hz, 25505 Hz]
+    q_factor: Mutex<f32>,           // 12
+    filter_mode: Mutex<FilterType>  // 13
 }
 
 impl RParams {
@@ -93,7 +105,7 @@ impl RParams {
         let mut log_lock = self.log.lock().unwrap();
 
         *log_lock = number;
-        
+
         drop(log_lock);
         
         // ABSOLUTELY NECESSARY
@@ -131,6 +143,32 @@ impl RParams {
 
         return lfo_route;
     }
+
+    pub fn cutoff_frequency(&self) -> f32 {
+        let cutoff_frequency_lock = self.cutoff_frequency.lock().unwrap();
+        let cutoff_frequency = cutoff_frequency_lock.clone();
+        drop(cutoff_frequency_lock);
+
+        let cutoff_exponential = CUTOFF_FREQUENCY_MAX * (f32::powf(CUTOFF_EXPONENT_BASE, cutoff_frequency.clone()) - 1.0) / (CUTOFF_EXPONENT_BASE - 1.0);
+
+        return cutoff_exponential;
+    }
+
+    pub fn q_factor(&self) -> f32 {
+        let q_factor_lock = self.q_factor.lock().unwrap();
+        let q_factor = q_factor_lock.clone();
+        drop(q_factor_lock);
+
+        return 1.0 - q_factor; // so that the knob is "flipped"
+    }
+
+    pub fn filter_mode(&self) -> FilterType {
+        let filter_mode_lock = self.filter_mode.lock().unwrap();
+        let filter_mode = filter_mode_lock.clone();
+        drop(filter_mode_lock);
+
+        return filter_mode;
+    }
 }
 
 
@@ -154,6 +192,10 @@ impl Default for RParams {
             lfo_wave: Mutex::new(Wave::Sine),
             lfo_intensity: Mutex::new(0.0),
             lfo_route: Mutex::new(Route::None),
+
+            cutoff_frequency: Mutex::new(1.0),
+            q_factor: Mutex::new(0.0),
+            filter_mode: Mutex::new(FilterType::LowPass),
         }
     }
 }
@@ -161,11 +203,11 @@ impl Default for RParams {
 impl PluginParameters for RParams {
     fn get_parameter_label(&self, index: i32) -> String {
         match index {
-            0 | 8 | 9 | 10 => String::from(""),
+            0 | 8 | 9 | 10 | 12 | 13 => String::from(""),
             1 | 2 | 4 => String::from("ms"),
             3 => String::from("%velocity"),
             5 => String::from("semitones"),
-            7 => String::from("Hz"),
+            7 | 11 => String::from("Hz"),
             _ => String::from("UNKNOWN"),
         }
     }
@@ -216,6 +258,21 @@ impl PluginParameters for RParams {
                 let lfo_route = self.lfo_route.lock().unwrap();
                 return lfo_route.to_string();
             }
+            11 => {
+                let cutoff_frequency = self.cutoff_frequency.lock().unwrap();
+
+                let cutoff_exponential = CUTOFF_FREQUENCY_MAX * (f32::powf(CUTOFF_EXPONENT_BASE, cutoff_frequency.clone()) - 1.0) / (CUTOFF_EXPONENT_BASE - 1.0);
+
+                return cutoff_exponential.to_string();
+            },
+            12 => {
+                let q_factor = self.q_factor.lock().unwrap();
+                return q_factor.to_string();
+            },
+            13 => {
+                let filter_mode = self.filter_mode.lock().unwrap();
+                return filter_mode.to_string();
+            },
             _ => return String::from("UNKNOWN")
         }
     }
@@ -233,6 +290,9 @@ impl PluginParameters for RParams {
             8 => String::from("LFO Wave"),
             9 => String::from("LFO Intensity"),
             10 => String::from("LFO Route"),
+            11 => String::from("Filter Cutoff"),
+            12 => String::from("Resonance"),
+            13 => String::from("Filter Mode"),
             _ => String::from("UNKNOWN"),
         }
     }
@@ -278,7 +338,19 @@ impl PluginParameters for RParams {
             10 => {
                 let lfo_route = self.lfo_route.lock().unwrap();
                 return lfo_route.to_f32();
-            }
+            },
+            11 => {
+                let cutoff_frequency = self.cutoff_frequency.lock().unwrap();
+                return cutoff_frequency.clone();
+            },
+            12 => {
+                let q_factor = self.q_factor.lock().unwrap();
+                return q_factor.clone();
+            },
+            13 => {
+                let filter_mode = self.filter_mode.lock().unwrap();
+                return filter_mode.to_f32();
+            },
             _ => return 0.0
         }
     }
@@ -349,6 +421,18 @@ impl PluginParameters for RParams {
                 let mut lfo_route = self.lfo_route.lock().unwrap();
                 *lfo_route = Route::from_f32(value);
             },
+            11 => {
+                let mut cutoff_frequency = self.cutoff_frequency.lock().unwrap();
+                *cutoff_frequency = value;
+            },
+            12 => {
+                let mut q_factor = self.q_factor.lock().unwrap();
+                *q_factor = value;
+            },
+            13 => {
+                let mut filter_mode = self.filter_mode.lock().unwrap();
+                *filter_mode = FilterType::from_f32(value);
+            },
             _ => {}
         }
     }
@@ -373,6 +457,13 @@ impl PluginParameters for RParams {
                 let mut lfo_route = self.lfo_route.lock().unwrap();
 
                 *lfo_route = Route::from_string(text);
+                
+                return true
+            },
+            13 => {
+                let mut filter_mode = self.filter_mode.lock().unwrap();
+
+                *filter_mode = FilterType::from_string(text);
                 
                 return true
             },

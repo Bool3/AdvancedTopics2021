@@ -43,12 +43,17 @@ impl Wave {
     }
     
     pub fn from_f32(val: f32) -> Wave {
-        match val {
-            v if v == 0.0 => Wave::Sine,
-            v if v == 0.25 => Wave::Triangle,
-            v if v == 0.5 => Wave::Square,
-            v if v == 0.75 => Wave::Saw,
-            _ => Wave::Sine,
+        if val < 0.25 {
+            return Wave::Sine;
+
+        } else if val < 0.5 {
+            return Wave::Triangle;
+
+        } else if val < 0.75 {
+            return Wave::Square;
+
+        } else {
+            return Wave::Saw;
         }
     }
 }
