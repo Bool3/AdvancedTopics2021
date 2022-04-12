@@ -119,7 +119,8 @@ impl RProcessor {
     pub fn process(&mut self) -> f32 {
 
         // get parameters
-        let wave = self.params.wave();
+        let wave_1 = self.params.wave_1();
+        let wave_2 = self.params.wave_2();
 
         let attack = self.params.attack();
         let decay = self.params.decay();
@@ -134,6 +135,9 @@ impl RProcessor {
         let cutoff_frequency = self.params.cutoff_frequency();
         let q_factor = self.params.q_factor();
         let filter_mode = self.params.filter_mode();
+
+        let osc_1_vol = self.params.osc_1_volume();
+        let osc_2_vol = self.params.osc_2_volume();
 
         // update and process LFO
         self.lfo.update_frequency(lfo_frequency);
@@ -192,7 +196,7 @@ impl RProcessor {
             voice.multiply_frequency(self.pitch_bend_multiplier * lfo_frequency_multiplier);
 
             // process
-            val += self.volume * voice.process(wave);
+            val += self.volume * voice.process(wave_1, wave_2, osc_1_vol, osc_2_vol);
         }
 
         // apply amplitude modulation

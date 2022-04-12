@@ -30,7 +30,7 @@ const CUTOFF_EXPONENT_BASE: f32 = 10.0;
 pub struct RParams {
     pub host: HostCallback,         // included for logging purposes
     
-    wave: Mutex<Wave>,              // 0
+    wave_1: Mutex<Wave>,              // 0
     
     attack: Mutex<f32>,             // 1
     decay: Mutex<f32>,              // 2
@@ -49,16 +49,28 @@ pub struct RParams {
     cutoff_frequency: Mutex<f32>,   // 11 -- internally linear [0, 1]
                                     //    -- exported exponentially [0 Hz, 25505 Hz]
     q_factor: Mutex<f32>,           // 12
-    filter_mode: Mutex<FilterType>  // 13
+    filter_mode: Mutex<FilterType>, // 13
+
+    wave_2: Mutex<Wave>,            // 14
+    osc_1_volume: Mutex<f32>,       // 15
+    osc_2_volume: Mutex<f32>,       // 16
 }
 
 impl RParams {
-    pub fn wave(&self) -> Wave {
-        let wave_lock = self.wave.lock().unwrap();
-        let wave = wave_lock.clone();
-        drop(wave_lock);
+    pub fn wave_1(&self) -> Wave {
+        let wave_1_lock = self.wave_1.lock().unwrap();
+        let wave_1 = wave_1_lock.clone();
+        drop(wave_1_lock);
 
-        return wave;
+        return wave_1;
+    }
+
+    pub fn wave_2(&self) -> Wave {
+        let wave_2_lock = self.wave_2.lock().unwrap();
+        let wave_2 = wave_2_lock.clone();
+        drop(wave_2_lock);
+
+        return wave_2;
     }
 
     pub fn attack(&self) -> f32 {
@@ -169,6 +181,22 @@ impl RParams {
 
         return filter_mode;
     }
+
+    pub fn osc_1_volume(&self) -> f32 {
+        let osc_1_volume_lock = self.osc_1_volume.lock().unwrap();
+        let osc_1_volume = osc_1_volume_lock.clone();
+        drop(osc_1_volume_lock);
+
+        return osc_1_volume;
+    }
+
+    pub fn osc_2_volume(&self) -> f32 {
+        let osc_2_volume_lock = self.osc_2_volume.lock().unwrap();
+        let osc_2_volume = osc_2_volume_lock.clone();
+        drop(osc_2_volume_lock);
+
+        return osc_2_volume;
+    }
 }
 
 
@@ -177,7 +205,7 @@ impl Default for RParams {
         return RParams {
             host: HostCallback::default(),
 
-            wave: Mutex::new(Wave::Sine),
+            wave_1: Mutex::new(Wave::Sine),
 
             attack: Mutex::new(ATTACK_MIN),
             decay: Mutex::new(DECAY_MIN),
@@ -196,6 +224,10 @@ impl Default for RParams {
             cutoff_frequency: Mutex::new(1.0),
             q_factor: Mutex::new(0.0),
             filter_mode: Mutex::new(FilterType::LowPass),
+
+            wave_2: Mutex::new(Wave::Sine),
+            osc_1_volume: Mutex::new(1.0),
+            osc_2_volume: Mutex::new(0.0),
         }
     }
 }
@@ -203,7 +235,7 @@ impl Default for RParams {
 impl PluginParameters for RParams {
     fn get_parameter_label(&self, index: i32) -> String {
         match index {
-            0 | 8 | 9 | 10 | 12 | 13 => String::from(""),
+            0 | 8 | 9 | 10 | 12 | 13 | 14 | 15 | 16 => String::from(""),
             1 | 2 | 4 => String::from("ms"),
             3 => String::from("%velocity"),
             5 => String::from("semitones"),
@@ -215,8 +247,8 @@ impl PluginParameters for RParams {
     fn get_parameter_text(&self, index: i32) -> String {
         match index {
             0 => {
-                let wave = self.wave.lock().unwrap();
-                return wave.to_string();
+                let wave_1 = self.wave_1.lock().unwrap();
+                return wave_1.to_string();
             },
             1 => {
                 let attack = self.attack.lock().unwrap();
@@ -273,6 +305,18 @@ impl PluginParameters for RParams {
                 let filter_mode = self.filter_mode.lock().unwrap();
                 return filter_mode.to_string();
             },
+            14 => {
+                let wave_2 = self.wave_2.lock().unwrap();
+                return wave_2.to_string();
+            },
+            15 => {
+                let osc_1_volume = self.osc_1_volume.lock().unwrap();
+                return osc_1_volume.to_string();
+            }
+            16 => {
+                let osc_2_volume = self.osc_2_volume.lock().unwrap();
+                return osc_2_volume.to_string();
+            }
             _ => return String::from("UNKNOWN")
         }
     }
@@ -293,6 +337,9 @@ impl PluginParameters for RParams {
             11 => String::from("Filter Cutoff"),
             12 => String::from("Resonance"),
             13 => String::from("Filter Mode"),
+            14 => String::from("Wave"),
+            15 => String::from("Osc 1 Vol"),
+            16 => String::from("Osc 2 Vol"),
             _ => String::from("UNKNOWN"),
         }
     }
@@ -300,8 +347,8 @@ impl PluginParameters for RParams {
     fn get_parameter(&self, index: i32) -> f32 {
         match index {
             0 => {
-                let wave = self.wave.lock().unwrap();
-                return wave.to_f32();
+                let wave_1 = self.wave_1.lock().unwrap();
+                return wave_1.to_f32();
             },
             1 => {
                 let attack = self.attack.lock().unwrap();
@@ -351,6 +398,18 @@ impl PluginParameters for RParams {
                 let filter_mode = self.filter_mode.lock().unwrap();
                 return filter_mode.to_f32();
             },
+            14 => {
+                let wave_2 = self.wave_2.lock().unwrap();
+                return wave_2.to_f32();
+            },
+            15 => {
+                let osc_1_volume = self.osc_1_volume.lock().unwrap();
+                return osc_1_volume.clone();
+            },
+            16 => {
+                let osc_2_volume = self.osc_2_volume.lock().unwrap();
+                return osc_2_volume.clone();
+            },
             _ => return 0.0
         }
     }
@@ -358,8 +417,8 @@ impl PluginParameters for RParams {
     fn set_parameter(&self, index: i32, value: f32) {
         match index {
             0 => {
-                let mut wave = self.wave.lock().unwrap();
-                *wave = Wave::from_f32(value);
+                let mut wave_1 = self.wave_1.lock().unwrap();
+                *wave_1 = Wave::from_f32(value);
             },
             1 => {
                 let mut attack = self.attack.lock().unwrap();
@@ -433,6 +492,18 @@ impl PluginParameters for RParams {
                 let mut filter_mode = self.filter_mode.lock().unwrap();
                 *filter_mode = FilterType::from_f32(value);
             },
+            14 => {
+                let mut wave_2 = self.wave_2.lock().unwrap();
+                *wave_2 = Wave::from_f32(value);
+            },
+            15 => {
+                let mut osc_1_volume = self.osc_1_volume.lock().unwrap();
+                *osc_1_volume = value;
+            },
+            16 => {
+                let mut osc_2_volume = self.osc_2_volume.lock().unwrap();
+                *osc_2_volume = value;
+            },
             _ => {}
         }
     }
@@ -440,9 +511,9 @@ impl PluginParameters for RParams {
     fn string_to_parameter(&self, index: i32, text: String) -> bool {
         match index {
             0 => {
-                let mut wave = self.wave.lock().unwrap();
+                let mut wave_1 = self.wave_1.lock().unwrap();
                 
-                *wave = Wave::from_string(text);
+                *wave_1 = Wave::from_string(text);
                 
                 return true
             },
@@ -464,6 +535,13 @@ impl PluginParameters for RParams {
                 let mut filter_mode = self.filter_mode.lock().unwrap();
 
                 *filter_mode = FilterType::from_string(text);
+                
+                return true
+            },
+            14 => {
+                let mut wave_1 = self.wave_1.lock().unwrap();
+                
+                *wave_1 = Wave::from_string(text);
                 
                 return true
             },

@@ -8,9 +8,14 @@ pub struct RVoice {
     sample_rate: f32,
     pub note: u8,
     pub is_on: bool,
-    
-    oscillator: Osc,
+
     pub envelope: Adsr,
+
+    osc_1: Osc,
+    osc_2: Osc,
+
+    osc_1_detune: i32,      // in cents
+    osc_2_detune: i32,      // in cents
 }
 
 impl RVoice {
@@ -20,30 +25,42 @@ impl RVoice {
             note: 69,
             is_on: false,
 
-            oscillator: Osc::new(note_to_frequency(69), sample_rate),
             envelope: Adsr::new(),
+
+            osc_1: Osc::new(note_to_frequency(69), sample_rate),
+            osc_2: Osc::new(note_to_frequency(69), sample_rate),
+
+            osc_1_detune: 0,
+            osc_2_detune: 0,
         }
     }
 
     pub fn update_sample_rate(&mut self, sample_rate: f32) {
         self.sample_rate = sample_rate;
 
-        self.oscillator.update_sample_rate(sample_rate);
+        self.osc_1.update_sample_rate(sample_rate);
+        self.osc_2.update_sample_rate(sample_rate);
     }
 
     pub fn reset(&mut self) {
         self.is_on = false;
-        self.oscillator.reset();
         self.envelope.reset();
+
+        self.osc_1.reset();
+        self.osc_2.reset();
     }
 
     pub fn play(&mut self, note: u8, velocity: u8) {
         if velocity != 0 {
             self.note = note;
-            self.oscillator.update_frequency(note_to_frequency(note));
-            self.oscillator.reset();
             self.is_on = true;
             self.envelope.start(velocity);
+
+            self.osc_1.update_frequency(note_to_frequency(note));
+            self.osc_1.reset();
+
+            self.osc_2.update_frequency(note_to_frequency(note));
+            self.osc_2.reset();
         }
     }
 
@@ -58,15 +75,19 @@ impl RVoice {
     pub fn multiply_frequency(&mut self, multiplier: f32) {
         let new_frequency = note_to_frequency(self.note) * multiplier;
 
-        self.oscillator.update_frequency(new_frequency);
+        self.osc_1.update_frequency(new_frequency);
+        self.osc_2.update_frequency(new_frequency);
     }
     
-    pub fn process(&mut self, wave: Wave) -> f32 {
-        let mut val;
+    pub fn process(&mut self, wave_1: Wave, wave_2: Wave, osc_1_vol: f32, osc_2_vol: f32) -> f32 {
+        let mut val = 0.0;
 
         if self.is_on {
+            
+            val += self.osc_1.process(wave_1) * osc_1_vol;
+            val += self.osc_2.process(wave_2) * osc_2_vol;
 
-            val = self.oscillator.process(wave);
+            // maybe divide by 2 for two oscillators
             val = self.envelope.process(val); 
 
             if self.envelope.is_done {

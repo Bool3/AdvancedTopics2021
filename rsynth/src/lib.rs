@@ -60,7 +60,7 @@ impl Plugin for RSynth {
             inputs: 2,
             outputs: 2,
             
-            parameters: 14,
+            parameters: 17,
             
             
             ..Default::default()
