@@ -27,6 +27,10 @@ const CUTOFF_FREQUENCY_MAX: f32 = 22050.0;
 // should be a whole number
 const CUTOFF_EXPONENT_BASE: f32 = 10.0;
 
+const OSC_DETUNE_SEMITONES_MAX: i32 = 36;   // 3 octaves
+const OSC_DETUNE_CENTS_MAX: i32 = 100;      // 1 semitone
+// remember to fix going over the frequency limit in the voice file
+
 pub struct RParams {
     pub host: HostCallback,         // included for logging purposes
     
@@ -52,8 +56,15 @@ pub struct RParams {
     filter_mode: Mutex<FilterType>, // 13
 
     wave_2: Mutex<Wave>,            // 14
+
     osc_1_volume: Mutex<f32>,       // 15
     osc_2_volume: Mutex<f32>,       // 16
+
+    osc_1_detune_semitones: Mutex<i32>,     // 17
+    osc_1_detune_cents: Mutex<i32>,         // 18
+    
+    osc_2_detune_semitones: Mutex<i32>,     // 19
+    osc_2_detune_cents: Mutex<i32>,         // 20
 }
 
 impl RParams {
@@ -197,6 +208,38 @@ impl RParams {
 
         return osc_2_volume;
     }
+
+    pub fn osc_1_detune_semitones(&self) -> i32 {
+        let osc_1_detune_semitones_lock = self.osc_1_detune_semitones.lock().unwrap();
+        let osc_1_detune_semitones = osc_1_detune_semitones_lock.clone();
+        drop(osc_1_detune_semitones_lock);
+
+        return osc_1_detune_semitones;
+    }
+
+    pub fn osc_1_detune_cents(&self) -> i32 {
+        let osc_1_detune_cents_lock = self.osc_1_detune_cents.lock().unwrap();
+        let osc_1_detune_cents = osc_1_detune_cents_lock.clone();
+        drop(osc_1_detune_cents_lock);
+
+        return osc_1_detune_cents;
+    }
+
+    pub fn osc_2_detune_semitones(&self) -> i32 {
+        let osc_2_detune_semitones_lock = self.osc_2_detune_semitones.lock().unwrap();
+        let osc_2_detune_semitones = osc_2_detune_semitones_lock.clone();
+        drop(osc_2_detune_semitones_lock);
+
+        return osc_2_detune_semitones;
+    }
+
+    pub fn osc_2_detune_cents(&self) -> i32 {
+        let osc_2_detune_cents_lock = self.osc_2_detune_cents.lock().unwrap();
+        let osc_2_detune_cents = osc_2_detune_cents_lock.clone();
+        drop(osc_2_detune_cents_lock);
+
+        return osc_2_detune_cents;
+    }
 }
 
 
@@ -226,8 +269,15 @@ impl Default for RParams {
             filter_mode: Mutex::new(FilterType::LowPass),
 
             wave_2: Mutex::new(Wave::Sine),
+
             osc_1_volume: Mutex::new(1.0),
             osc_2_volume: Mutex::new(0.0),
+
+            osc_1_detune_semitones: Mutex::new(0),
+            osc_1_detune_cents: Mutex::new(0),
+
+            osc_2_detune_semitones: Mutex::new(0),
+            osc_2_detune_cents: Mutex::new(0),
         }
     }
 }
@@ -238,8 +288,9 @@ impl PluginParameters for RParams {
             0 | 8 | 9 | 10 | 12 | 13 | 14 | 15 | 16 => String::from(""),
             1 | 2 | 4 => String::from("ms"),
             3 => String::from("%velocity"),
-            5 => String::from("semitones"),
+            5 | 17 | 19 => String::from("semitones"),
             7 | 11 => String::from("Hz"),
+            18 | 20 => String::from("cents"),
             _ => String::from("UNKNOWN"),
         }
     }
@@ -312,11 +363,27 @@ impl PluginParameters for RParams {
             15 => {
                 let osc_1_volume = self.osc_1_volume.lock().unwrap();
                 return osc_1_volume.to_string();
-            }
+            },
             16 => {
                 let osc_2_volume = self.osc_2_volume.lock().unwrap();
                 return osc_2_volume.to_string();
-            }
+            },
+            17 => {
+                let osc_1_detune_semitones = self.osc_1_detune_semitones.lock().unwrap();
+                return osc_1_detune_semitones.to_string();
+            },
+            18 => {
+                let osc_1_detune_cents = self.osc_1_detune_cents.lock().unwrap();
+                return osc_1_detune_cents.to_string();
+            },
+            19 => {
+                let osc_2_detune_semitones = self.osc_2_detune_semitones.lock().unwrap();
+                return osc_2_detune_semitones.to_string();
+            },
+            20 => {
+                let osc_2_detune_cents = self.osc_2_detune_cents.lock().unwrap();
+                return osc_2_detune_cents.to_string();
+            },
             _ => return String::from("UNKNOWN")
         }
     }
@@ -340,6 +407,8 @@ impl PluginParameters for RParams {
             14 => String::from("Wave"),
             15 => String::from("Osc 1 Vol"),
             16 => String::from("Osc 2 Vol"),
+            17 | 18 => String::from("Osc 1 Detune"),
+            19 | 20 => String::from("Osc 2 Detune"),
             _ => String::from("UNKNOWN"),
         }
     }
@@ -409,6 +478,22 @@ impl PluginParameters for RParams {
             16 => {
                 let osc_2_volume = self.osc_2_volume.lock().unwrap();
                 return osc_2_volume.clone();
+            },
+            17 => {
+                let osc_1_detune_semitones = self.osc_1_detune_semitones.lock().unwrap();
+                return (osc_1_detune_semitones.clone() + OSC_DETUNE_SEMITONES_MAX) as f32 / ((2 * OSC_DETUNE_SEMITONES_MAX) as f32);
+            },
+            18 => {
+                let osc_1_detune_cents = self.osc_1_detune_cents.lock().unwrap();
+                return (osc_1_detune_cents.clone() + OSC_DETUNE_CENTS_MAX) as f32 / ((2 * OSC_DETUNE_CENTS_MAX) as f32);
+            },
+            19 => {
+                let osc_2_detune_semitones = self.osc_2_detune_semitones.lock().unwrap();
+                return (osc_2_detune_semitones.clone() + OSC_DETUNE_SEMITONES_MAX) as f32 / ((2 * OSC_DETUNE_SEMITONES_MAX) as f32);
+            },
+            20 => {
+                let osc_2_detune_cents = self.osc_2_detune_cents.lock().unwrap();
+                return (osc_2_detune_cents.clone() + OSC_DETUNE_CENTS_MAX) as f32 / ((2 * OSC_DETUNE_CENTS_MAX) as f32);
             },
             _ => return 0.0
         }
@@ -503,6 +588,22 @@ impl PluginParameters for RParams {
             16 => {
                 let mut osc_2_volume = self.osc_2_volume.lock().unwrap();
                 *osc_2_volume = value;
+            },
+            17 => {
+                let mut osc_1_detune_semitones = self.osc_1_detune_semitones.lock().unwrap();
+                *osc_1_detune_semitones = (value * 2.0 * OSC_DETUNE_SEMITONES_MAX as f32) as i32 - OSC_DETUNE_SEMITONES_MAX;
+            },
+            18 => {
+                let mut osc_1_detune_cents = self.osc_1_detune_cents.lock().unwrap();
+                *osc_1_detune_cents = (value * 2.0 * OSC_DETUNE_CENTS_MAX as f32) as i32 - OSC_DETUNE_CENTS_MAX;
+            },
+            19 => {
+                let mut osc_2_detune_semitones = self.osc_2_detune_semitones.lock().unwrap();
+                *osc_2_detune_semitones = (value * 2.0 * OSC_DETUNE_SEMITONES_MAX as f32) as i32 - OSC_DETUNE_SEMITONES_MAX;
+            },
+            20 => {
+                let mut osc_2_detune_cents = self.osc_2_detune_cents.lock().unwrap();
+                *osc_2_detune_cents = (value * 2.0 * OSC_DETUNE_CENTS_MAX as f32) as i32 - OSC_DETUNE_CENTS_MAX;
             },
             _ => {}
         }

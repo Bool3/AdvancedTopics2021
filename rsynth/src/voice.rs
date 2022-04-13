@@ -14,8 +14,8 @@ pub struct RVoice {
     osc_1: Osc,
     osc_2: Osc,
 
-    osc_1_detune: i32,      // in cents
-    osc_2_detune: i32,      // in cents
+    pub osc_1_detune: f32,      // multiplier
+    pub osc_2_detune: f32,      // multiplier
 }
 
 impl RVoice {
@@ -30,8 +30,8 @@ impl RVoice {
             osc_1: Osc::new(note_to_frequency(69), sample_rate),
             osc_2: Osc::new(note_to_frequency(69), sample_rate),
 
-            osc_1_detune: 0,
-            osc_2_detune: 0,
+            osc_1_detune: 1.0,
+            osc_2_detune: 1.0,
         }
     }
 
@@ -75,8 +75,8 @@ impl RVoice {
     pub fn multiply_frequency(&mut self, multiplier: f32) {
         let new_frequency = note_to_frequency(self.note) * multiplier;
 
-        self.osc_1.update_frequency(new_frequency);
-        self.osc_2.update_frequency(new_frequency);
+        self.osc_1.update_frequency(new_frequency * self.osc_1_detune);
+        self.osc_2.update_frequency(new_frequency * self.osc_2_detune);
     }
     
     pub fn process(&mut self, wave_1: Wave, wave_2: Wave, osc_1_vol: f32, osc_2_vol: f32) -> f32 {

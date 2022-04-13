@@ -6,6 +6,14 @@ fn ms_to_samples(time: f32, sample_rate: f32) -> u32 {
     (sample_rate * time / 1000.0) as u32
 }
 
+fn semitones_to_multiplier(semitones: f32) -> f32 {
+    2.0_f32.powf(semitones / 12.0)
+}
+
+fn cents_to_multiplier(cents: f32) -> f32 {
+    2.0_f32.powf(cents / 1200.0)
+}
+
 pub struct RProcessor {
     sample_rate: f32,
     voices: Vec<RVoice>,
@@ -113,7 +121,7 @@ impl RProcessor {
         }
 
         // what we multiply by our base frequency to bend it however many semitones we want
-        self.pitch_bend_multiplier = 2.0_f32.powf(semitones / 12.0);
+        self.pitch_bend_multiplier = semitones_to_multiplier(semitones);
     }
     
     pub fn process(&mut self) -> f32 {
@@ -138,6 +146,13 @@ impl RProcessor {
 
         let osc_1_vol = self.params.osc_1_volume();
         let osc_2_vol = self.params.osc_2_volume();
+
+        // calculate detune
+        let osc_1_detune = self.params.osc_1_detune_cents() + self.params.osc_1_detune_semitones() * 100;
+        let osc_1_detune_multiplier = cents_to_multiplier(osc_1_detune as f32);
+
+        let osc_2_detune = self.params.osc_2_detune_cents() + self.params.osc_2_detune_semitones() * 100;
+        let osc_2_detune_multiplier = cents_to_multiplier(osc_2_detune as f32);
 
         // update and process LFO
         self.lfo.update_frequency(lfo_frequency);
@@ -183,6 +198,10 @@ impl RProcessor {
 
         // process voices
         for voice in &mut self.voices {
+
+            // set detune
+            voice.osc_1_detune = osc_1_detune_multiplier;
+            voice.osc_2_detune = osc_2_detune_multiplier;
 
             // set adsr (only if envelope is finished)
             if voice.envelope.is_done {
