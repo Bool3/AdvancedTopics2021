@@ -23,6 +23,7 @@
       <GROUP id="{F8716FBA-41AA-C9EB-0552-4FAFE0CA77B9}" name="Processor">
         <FILE id="eNYJUR" name="Adsr.cpp" compile="1" resource="0" file="Source/Processor/Adsr.cpp"/>
         <FILE id="xgfgHx" name="Adsr.h" compile="0" resource="0" file="Source/Processor/Adsr.h"/>
+        <FILE id="ij2r8v" name="FilterType.h" compile="0" resource="0" file="Source/Processor/FilterType.h"/>
         <FILE id="gvUWxt" name="JOsc.cpp" compile="1" resource="0" file="Source/Processor/JOsc.cpp"/>
         <FILE id="r4bgV5" name="JOsc.h" compile="0" resource="0" file="Source/Processor/JOsc.h"/>
         <FILE id="kyaOFz" name="JProcessor.cpp" compile="1" resource="0" file="Source/Processor/JProcessor.cpp"/>
@@ -30,6 +31,8 @@
         <FILE id="GCwVPi" name="JVoice.cpp" compile="1" resource="0" file="Source/Processor/JVoice.cpp"/>
         <FILE id="cr6Bdq" name="JVoice.h" compile="0" resource="0" file="Source/Processor/JVoice.h"/>
         <FILE id="mC7Foz" name="Route.h" compile="0" resource="0" file="Source/Processor/Route.h"/>
+        <FILE id="GCnbKI" name="Vcf.cpp" compile="1" resource="0" file="Source/Processor/Vcf.cpp"/>
+        <FILE id="NRbBHT" name="Vcf.h" compile="0" resource="0" file="Source/Processor/Vcf.h"/>
         <FILE id="zEZr9L" name="Wave.h" compile="0" resource="0" file="Source/Processor/Wave.h"/>
       </GROUP>
       <FILE id="ZT73bk" name="PluginProcessor.cpp" compile="1" resource="0"

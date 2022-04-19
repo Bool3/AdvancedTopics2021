@@ -6,8 +6,6 @@
   ==============================================================================
 */
 
-#include <random>
-
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
@@ -26,9 +24,15 @@ JSynthAudioProcessor::JSynthAudioProcessor()
                        )
 #endif
 {
-    volume = new juce::AudioParameterFloat("volume", "Volume", 0.0, 1.0, 0.125);
+    wave1 = new juce::AudioParameterChoice("wave1", "Wave 1", { "Sine", "Triangle", "Square", "Saw" }, 0);
+    volume1 = new juce::AudioParameterFloat("volume1", "Volume 1", 0.0, 1.0, 0.125);
+    detuneSemitones1 = new juce::AudioParameterInt("detuneSemitones1", "Detune Semitones 1", -36, 36, 0);
+    detuneCents1 = new juce::AudioParameterInt("detuneCents1", "Detune Cents 1", -100, 100, 0);
 
-    wave = new juce::AudioParameterChoice("wave", "Wave", { "Sine", "Triangle", "Square", "Saw" }, 0);
+    wave2 = new juce::AudioParameterChoice("wave2", "Wave 2", { "Sine", "Triangle", "Square", "Saw" }, 0);
+    volume2 = new juce::AudioParameterFloat("volume2", "Volume 2", 0.0, 1.0, 0.125);
+    detuneSemitones2 = new juce::AudioParameterInt("detuneSemitones2", "Detune Semitones 2", -36, 36, 0);
+    detuneCents2 = new juce::AudioParameterInt("detuneCents2", "Detune Cents 2", -100, 100, 0);
 
     attack = new juce::AudioParameterFloat("attack", "Attack", 10.0, 4000.0, 10.0);
     decay = new juce::AudioParameterFloat("decay", "Decay", 10.0, 4000.0, 10.0);
@@ -42,13 +46,28 @@ JSynthAudioProcessor::JSynthAudioProcessor()
     lfoIntensity = new juce::AudioParameterFloat("lfoIntensity", "LFO Intensity", 0.0, 1.0, 0.0);
     lfoRoute = new juce::AudioParameterChoice("lfoRoute", "LFO Route", { "None", "Amplitude", "Frequency"}, 0);
     
-    addParameter(volume);
-    addParameter(wave);
+    filterType = new juce::AudioParameterChoice("filterType", "Filter Type", { "None", "High Pass", "Band Pass", "Low Pass" }, 0);
+    filterCutoffFrequency = new juce::AudioParameterFloat("filterCutoffFrequency", "Filter Cutoff Frequency", 0.0, 22050.0, 0.0);
+    filterQFactor = new juce::AudioParameterFloat("filterQFactor", "Filter Q Factor", 0.0, 1.0, 0.0);
+
+
+    addParameter(wave1);
+    addParameter(volume1);
+    addParameter(detuneSemitones1);
+    addParameter(detuneCents1);
+
+    addParameter(wave2);
+    addParameter(volume2);
+    addParameter(detuneSemitones2);
+    addParameter(detuneCents2);
+
     addParameter(attack);
     addParameter(decay);
     addParameter(sustain);
     addParameter(release);
+
     addParameter(pitchBendLimit);
+
     addParameter(lfoFrequency);
     addParameter(lfoWave);
     addParameter(lfoIntensity);

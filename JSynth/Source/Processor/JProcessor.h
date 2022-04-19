@@ -3,6 +3,7 @@
 
 #include "../PluginProcessor.h"
 #include "JVoice.h"
+#include "Vcf.h"
 
 class JProcessor {
 public:
@@ -26,6 +27,7 @@ private:
 	JSynthAudioProcessor& audioProcessor;
 	std::vector<JVoice*>* voices;
 	JOsc* lfo;
+	Vcf* vcf;
 	float pitchBendMultiplier;
 
 };

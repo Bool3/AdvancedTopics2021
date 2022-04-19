@@ -54,9 +54,15 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
-    juce::AudioParameterFloat* volume;
+    juce::AudioParameterChoice* wave1;
+    juce::AudioParameterFloat* volume1;
+    juce::AudioParameterInt* detuneSemitones1;
+    juce::AudioParameterInt* detuneCents1;
 
-    juce::AudioParameterChoice* wave;
+    juce::AudioParameterChoice* wave2;
+    juce::AudioParameterFloat* volume2;
+    juce::AudioParameterInt* detuneSemitones2;
+    juce::AudioParameterInt* detuneCents2;
 
     juce::AudioParameterFloat* attack;
     juce::AudioParameterFloat* decay;
@@ -69,6 +75,10 @@ public:
     juce::AudioParameterChoice* lfoWave;
     juce::AudioParameterFloat* lfoIntensity;
     juce::AudioParameterChoice* lfoRoute;
+
+    juce::AudioParameterChoice* filterType;
+    juce::AudioParameterFloat* filterCutoffFrequency;
+    juce::AudioParameterFloat* filterQFactor;
 
 private:
 

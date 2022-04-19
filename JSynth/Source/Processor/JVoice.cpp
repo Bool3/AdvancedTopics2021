@@ -13,7 +13,12 @@ JVoice::JVoice() {
 	note = 0;
 	on = false;
 
-	oscillator = new JOsc(noteToFrequency(69), sampleRate);
+	osc1 = new JOsc(noteToFrequency(69), sampleRate);
+	osc2 = new JOsc(noteToFrequency(69), sampleRate);
+
+	osc1detune = 1.0;
+	osc2detune = 1.0;
+
 	envelope = new Adsr();
 }
 
@@ -24,20 +29,27 @@ JVoice::~JVoice() {
 void JVoice::updateSampleRate(float sr) {
 	sampleRate = sr;
 
-	oscillator->updateSampleRate(sampleRate);
+	osc1->updateSampleRate(sampleRate);
+	osc2->updateSampleRate(sampleRate);
 }
 
 void JVoice::reset() {
 	on = false;
-	oscillator->reset();
+	osc1->reset();
+	osc2->reset();
 	envelope->reset();
 }
 
 void JVoice::play(char n, char velocity) {
 	if (velocity != 0) {
 		note = n;
-		oscillator->updateFrequency(noteToFrequency(note));
-		oscillator->reset();
+
+		osc1->updateFrequency(noteToFrequency(note));
+		osc1->reset();
+
+		osc2->updateFrequency(noteToFrequency(note));
+		osc2->reset();
+
 		on = true;
 		envelope->start(velocity);
 	}
@@ -54,14 +66,17 @@ void JVoice::releaseEnvelope() {
 void JVoice::multiplyFrequency(float multiplier) {
 	float newFrequency = noteToFrequency(note) * multiplier;
 
-	oscillator->updateFrequency(newFrequency);
+	osc1->updateFrequency(newFrequency * osc1detune);
+	osc2->updateFrequency(newFrequency * osc2detune);
 }
 
-float JVoice::process(Wave wave) {
+float JVoice::process(Wave wave1, Wave wave2, float osc1Volume, float osc2Volume) {
 	float val = 0.0;
 
 	if (on) {
-		val = oscillator->process(wave);
+		val += osc1->process(wave1) * osc1Volume;
+		val += osc2->process(wave2) * osc2Volume;
+
 		val = envelope->process(val);
 
 		if (envelope->isDone) {

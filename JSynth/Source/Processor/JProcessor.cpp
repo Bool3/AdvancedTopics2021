@@ -10,6 +10,13 @@ unsigned int msToSamples(float time, float sampleRate) {
 	return (unsigned int)(sampleRate * time / 1000.0);
 }
 
+float semitonesToMultiplier(float semitones) {
+	return powf(2.0, semitones / 12.0);
+}
+
+float centsToMultiplier(float cents) {
+	return powf(2.0, cents / 1200.0);
+}
 
 JProcessor::JProcessor(JSynthAudioProcessor& p) : audioProcessor(p) {
 	sampleRate = 44100.0;
@@ -28,8 +35,11 @@ JProcessor::JProcessor(JSynthAudioProcessor& p) : audioProcessor(p) {
 	}
 
 	lfo = new JOsc(0.0, 44100.0);
+	vcf = new Vcf();
 
 	pitchBendMultiplier = 1.0;
+
+	updateSampleRate(44100.0);
 }
 
 JProcessor::~JProcessor() {
@@ -41,6 +51,7 @@ void JProcessor::updateSampleRate(float newSampleRate) {
 	sampleRate = newSampleRate;
 
 	lfo->updateSampleRate(sampleRate);
+	vcf->updateSampleRate(sampleRate);
 
 	for (int i = 0; i < voices->size(); i++) {
 		voices->at(i)->updateSampleRate(sampleRate);
@@ -93,8 +104,17 @@ void JProcessor::updatePitchBendMultiplier(int pitchBend) {
 }
 
 float JProcessor::process() {
-	float volume = audioProcessor.volume->get();
-	Wave wave = (Wave)audioProcessor.wave->getIndex();
+	Wave wave1 = (Wave)audioProcessor.wave1->getIndex();
+	float volume1 = audioProcessor.volume1->get();
+	int detuneSemitones1 = audioProcessor.detuneSemitones1->get();
+	int detuneCents1 = audioProcessor.detuneCents1->get();
+
+	Wave wave2 = (Wave)audioProcessor.wave2->getIndex();
+	float volume2 = audioProcessor.volume2->get();
+	int detuneSemitones2 = audioProcessor.detuneSemitones2->get();
+	int detuneCents2 = audioProcessor.detuneCents2->get();
+
+
 	float attack = audioProcessor.attack->get();
 	float decay = audioProcessor.decay->get();
 	float sustain = audioProcessor.sustain->get();
@@ -104,6 +124,18 @@ float JProcessor::process() {
 	Wave lfoWave = (Wave)audioProcessor.lfoWave->getIndex();
 	float lfoIntensity = audioProcessor.lfoIntensity->get();
 	Route lfoRoute = (Route)audioProcessor.lfoRoute->getIndex();
+
+	FilterType filterType = (FilterType)audioProcessor.filterType->getIndex();
+	float filterCutoffFrequency = audioProcessor.filterCutoffFrequency->get();
+	float filterQFactor = audioProcessor.filterQFactor->get();
+
+	int osc1Detune = detuneCents1 + (detuneSemitones1 * 100);
+	float osc1DetuneMultiplier = centsToMultiplier((float)osc1Detune);
+
+	int osc2Detune = detuneCents2 + (detuneSemitones2 * 100);
+	float osc2DetuneMultiplier = centsToMultiplier((float)osc2Detune);
+
+
 
 	lfo->updateFrequency(lfoFrequency);
 	float lfoVal = lfo->process(lfoWave);
@@ -133,6 +165,9 @@ float JProcessor::process() {
 	for (int i = 0; i < voices->size(); i++) {
 		JVoice* voice = voices->at(i);
 
+		voice->osc1Detune = osc1DetuneMultiplier;
+		voice->osc2Detune = osc2DetuneMultiplier;
+
 		if (voice->envelope->isDone) {
 			voice->envelope->attack = msToSamples(attack, sampleRate);
 			voice->envelope->decay = msToSamples(decay, sampleRate);
@@ -142,10 +177,12 @@ float JProcessor::process() {
 
 		voice->multiplyFrequency(pitchBendMultiplier * lfoFrequencyMultiplier);
 
-		val += volume * voice->process(wave);
+		val += voice->process(wave1, wave2, volume1, volume2);
 	}
 
 	val *= lfoAmplitudeMultiplier;
+
+	val = vcf->svf(val, filterCutoffFrequency, filterQFactor, filterType);
 
 	return val;
 }
