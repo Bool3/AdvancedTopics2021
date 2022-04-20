@@ -50,5 +50,6 @@ float Vcf::svf(float val, float cutoff, float qFactor, FilterType filterType) {
 		return lowPassOutput;
 	} else {
 		// filtertype is none
+		return val;
 	}
 }

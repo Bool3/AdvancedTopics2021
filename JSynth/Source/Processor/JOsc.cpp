@@ -122,7 +122,7 @@ float JOsc::process(Wave wave) {
 
 	incrementPhase();
 
-	return normalize(val, wave);
+	return val;
 }
 
 void JOsc::incrementPhase() {
@@ -130,20 +130,5 @@ void JOsc::incrementPhase() {
 
 	if (phase > TWO_PI) {
 		phase -= TWO_PI;
-	}
-}
-
-float JOsc::normalize(float val, Wave wave) {
-	switch (wave) {
-		case Wave::Sine:
-			return val;
-		case Wave::Triangle:
-			return val;
-		case Wave::Square:
-			return val / BLEP_MAX;
-		case Wave::Saw:
-			return val / BLEP_MAX;
-		default:
-			return val;
 	}
 }

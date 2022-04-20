@@ -41,14 +41,14 @@ JSynthAudioProcessor::JSynthAudioProcessor()
 
     pitchBendLimit = new juce::AudioParameterInt("pitchBendLimit", "Pitch Bend Limit", 1, 64, 1);
 
-    lfoFrequency = new juce::AudioParameterFloat("lfoFrequency", "LFO Frequency", 0.0, 20.0, 0.0);
+    lfoFrequency = new juce::AudioParameterFloat("lfoFrequency", "LFO Frequency", 0.0, 1000.0, 0.0);
     lfoWave = new juce::AudioParameterChoice("lfoWave", "LFO Wave", { "Sine", "Triangle", "Square", "Saw" }, 0);
     lfoIntensity = new juce::AudioParameterFloat("lfoIntensity", "LFO Intensity", 0.0, 1.0, 0.0);
     lfoRoute = new juce::AudioParameterChoice("lfoRoute", "LFO Route", { "None", "Amplitude", "Frequency"}, 0);
     
     filterType = new juce::AudioParameterChoice("filterType", "Filter Type", { "None", "High Pass", "Band Pass", "Low Pass" }, 0);
     filterCutoffFrequency = new juce::AudioParameterFloat("filterCutoffFrequency", "Filter Cutoff Frequency", 0.0, 22050.0, 0.0);
-    filterQFactor = new juce::AudioParameterFloat("filterQFactor", "Filter Q Factor", 0.0, 1.0, 0.0);
+    filterQFactor = new juce::AudioParameterFloat("filterQFactor", "Filter Q Factor", 0.0, 1.0, 1.0);
 
 
     addParameter(wave1);
@@ -73,8 +73,11 @@ JSynthAudioProcessor::JSynthAudioProcessor()
     addParameter(lfoIntensity);
     addParameter(lfoRoute);
 
-    processors[0] = new JProcessor(*this);
-    processors[1] = new JProcessor(*this);
+    addParameter(filterType);
+    addParameter(filterCutoffFrequency);
+    addParameter(filterQFactor);
+
+    processor = new JProcessor(*this);
 }
 
 JSynthAudioProcessor::~JSynthAudioProcessor() {
@@ -179,32 +182,21 @@ void JSynthAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
         auto message = metadata.getMessage();
 
         if (message.isNoteOn()) {
-            processors[0]->noteOn(message.getNoteNumber(), message.getVelocity());
-            processors[1]->noteOn(message.getNoteNumber(), message.getVelocity());
-
+            processor->noteOn(message.getNoteNumber(), message.getVelocity());
         } else if (message.isNoteOff()) {
-            processors[0]->noteOff(message.getNoteNumber());
-            processors[1]->noteOff(message.getNoteNumber());
+            processor->noteOff(message.getNoteNumber());
         } else if (message.isPitchWheel()) {
-            processors[0]->updatePitchBendMultiplier(message.getPitchWheelValue());
-            processors[1]->updatePitchBendMultiplier(message.getPitchWheelValue());
+            processor->updatePitchBendMultiplier(message.getPitchWheelValue());
         }
 
     }
 
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumOutputChannels; channel++) {
-        for (int i = 0; i < buffer.getNumSamples(); i++) {
-            buffer.setSample(channel, i, processors[channel]->process());
-        }
-        // ..do something to the data...
 
-        
+    for (int i = 0; i < buffer.getNumSamples(); i++) {
+        float val = processor->process();
+
+        buffer.setSample(0, i, val);
+        buffer.setSample(1, i, val);
     }
 }
 

@@ -19,8 +19,6 @@ public:
 
 	void incrementPhase();
 
-	float normalize(float val, Wave wave);
-
 private:
 
 	void updateBlepSliceSampleLength(float sampleLength);

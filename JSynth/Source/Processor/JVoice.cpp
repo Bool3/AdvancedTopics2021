@@ -16,8 +16,8 @@ JVoice::JVoice() {
 	osc1 = new JOsc(noteToFrequency(69), sampleRate);
 	osc2 = new JOsc(noteToFrequency(69), sampleRate);
 
-	osc1detune = 1.0;
-	osc2detune = 1.0;
+	osc1Detune = 1.0;
+	osc2Detune = 1.0;
 
 	envelope = new Adsr();
 }
@@ -66,8 +66,8 @@ void JVoice::releaseEnvelope() {
 void JVoice::multiplyFrequency(float multiplier) {
 	float newFrequency = noteToFrequency(note) * multiplier;
 
-	osc1->updateFrequency(newFrequency * osc1detune);
-	osc2->updateFrequency(newFrequency * osc2detune);
+	osc1->updateFrequency(newFrequency * osc1Detune);
+	osc2->updateFrequency(newFrequency * osc2Detune);
 }
 
 float JVoice::process(Wave wave1, Wave wave2, float osc1Volume, float osc2Volume) {
