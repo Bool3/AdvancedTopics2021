@@ -3,6 +3,8 @@
 
 #include <JuceHeader.h>
 
+#include "OscillatorUI/OscillatorUI.h"
+
 class OscillatorsUI {
 public:
 	OscillatorsUI();
@@ -16,4 +18,7 @@ private:
 	int y;
 	int width;
 	int height;
+
+	OscillatorUI* oscillatorUI1;
+	OscillatorUI* oscillatorUI2;
 };

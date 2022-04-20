@@ -11,6 +11,11 @@
   <MAINGROUP id="tNUQ9r" name="JSynth">
     <GROUP id="{2A7D0527-7675-B86C-F789-267692BDDCEC}" name="Source">
       <GROUP id="{807F94D4-E39A-5750-863B-0B3767314CDB}" name="Editor">
+        <GROUP id="{F95E5ACF-719B-1B16-33AC-72AC2CFB1208}" name="OscillatorUI">
+          <FILE id="YT17mw" name="OscillatorUI.cpp" compile="1" resource="0"
+                file="Source/Editor/OscillatorUI/OscillatorUI.cpp"/>
+          <FILE id="tCvm11" name="OscillatorUI.h" compile="0" resource="0" file="Source/Editor/OscillatorUI/OscillatorUI.h"/>
+        </GROUP>
         <FILE id="DvWXia" name="Envelope.cpp" compile="1" resource="0" file="Source/Editor/Envelope.cpp"/>
         <FILE id="cXbkeb" name="Envelope.h" compile="0" resource="0" file="Source/Editor/Envelope.h"/>
         <FILE id="ePgtA5" name="Filters.cpp" compile="1" resource="0" file="Source/Editor/Filters.cpp"/>

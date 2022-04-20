@@ -2,7 +2,10 @@
 #include "Oscillators.h"
 
 OscillatorsUI::OscillatorsUI() {
+	x, y, width, height = 0;
 
+	oscillatorUI1 = new OscillatorUI(OscillatorNumber::One);
+	oscillatorUI2 = new OscillatorUI(OscillatorNumber::Two);
 }
 
 OscillatorsUI::~OscillatorsUI() {
@@ -10,8 +13,8 @@ OscillatorsUI::~OscillatorsUI() {
 }
 
 void OscillatorsUI::draw(juce::Graphics& g) {
-	g.setColour(juce::Colour::fromRGB(0, 0, 255));
-	g.drawRect(x, y, width, height);
+	oscillatorUI1->draw(g);
+	oscillatorUI2->draw(g);
 }
 
 void OscillatorsUI::resized(int xOffset, int yOffset, int w, int h) {
@@ -21,5 +24,6 @@ void OscillatorsUI::resized(int xOffset, int yOffset, int w, int h) {
 	width = w;
 	height = h;
 
-
+	oscillatorUI1->resized(xOffset, yOffset, width / 2, height);
+	oscillatorUI2->resized(xOffset + (width / 2), yOffset, width / 2, height);
 }

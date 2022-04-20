@@ -1,11 +1,20 @@
-/*
-  ==============================================================================
-
-    LFO.h
-    Created: 15 Mar 2022 2:43:56pm
-    Author:  Arthur
-
-  ==============================================================================
-*/
 
 #pragma once
+
+#include <JuceHeader.h>
+
+class LFOUI {
+public:
+	LFOUI();
+	~LFOUI();
+
+	void draw(juce::Graphics& g);
+	void resized(int xOffset, int yOffset, int width, int height);
+
+private:
+	int x;
+	int y;
+	int width;
+	int height;
+};
+

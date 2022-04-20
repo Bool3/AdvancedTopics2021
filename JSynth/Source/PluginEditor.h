@@ -12,6 +12,9 @@
 #include "PluginProcessor.h"
 
 #include "Editor/Oscillators.h"
+#include "Editor/Envelope.h"
+#include "Editor/Filters.h"
+#include "Editor/LFO.h"
 
 //==============================================================================
 /**
@@ -31,6 +34,9 @@ private:
     JSynthAudioProcessor& audioProcessor;
 
     OscillatorsUI* oscillatorsUI;
+    EnvelopeUI* envelopeUI;
+    FiltersUI* filtersUI;
+    LFOUI* lfoUI;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(JSynthAudioProcessorEditor)
 };

@@ -1,11 +1,20 @@
-/*
-  ==============================================================================
-
-    Filters.h
-    Created: 15 Mar 2022 2:43:34pm
-    Author:  Arthur
-
-  ==============================================================================
-*/
 
 #pragma once
+
+#include <JuceHeader.h>
+
+class FiltersUI {
+public:
+	FiltersUI();
+	~FiltersUI();
+
+	void draw(juce::Graphics& g);
+	void resized(int xOffset, int yOffset, int width, int height);
+
+private:
+	int x;
+	int y;
+	int width;
+	int height;
+};
+

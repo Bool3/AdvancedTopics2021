@@ -3,7 +3,7 @@
 
 enum class Wave {
 	Sine = 0,
-	Square = 1,
-	Triangle = 2,
+	Triangle = 1,
+	Square = 2,
 	Saw = 3,
 };
