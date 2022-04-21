@@ -13,7 +13,7 @@
 JSynthAudioProcessorEditor::JSynthAudioProcessorEditor(JSynthAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p)
 {
-    oscillatorsUI = new OscillatorsUI();
+    oscillatorsUI = new OscillatorsUI(p, this);
     envelopeUI = new EnvelopeUI();
     filtersUI = new FiltersUI();
     lfoUI = new LFOUI();

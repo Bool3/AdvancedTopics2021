@@ -1,11 +1,13 @@
 
 #include "Oscillators.h"
 
-OscillatorsUI::OscillatorsUI() {
+OscillatorsUI::OscillatorsUI(JSynthAudioProcessor& p, juce::AudioProcessorEditor* ed) : audioProcessor(p) {
+	editor = ed;
+
 	x, y, width, height = 0;
 
-	oscillatorUI1 = new OscillatorUI(OscillatorNumber::One);
-	oscillatorUI2 = new OscillatorUI(OscillatorNumber::Two);
+	oscillatorUI1 = new OscillatorUI(p, editor, OscillatorNumber::One);
+	oscillatorUI2 = new OscillatorUI(p, editor, OscillatorNumber::Two);
 }
 
 OscillatorsUI::~OscillatorsUI() {

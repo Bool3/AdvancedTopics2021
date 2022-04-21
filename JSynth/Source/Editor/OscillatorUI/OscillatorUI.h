@@ -3,6 +3,8 @@
 
 #include <JuceHeader.h>
 
+#include "../../PluginProcessor.h"
+
 enum class OscillatorNumber {
 	One = 1,
 	Two = 2,
@@ -10,13 +12,16 @@ enum class OscillatorNumber {
 
 class OscillatorUI : private juce::ComboBox::Listener {
 public:
-	OscillatorUI(OscillatorNumber oscillatorNumber);
+	OscillatorUI(JSynthAudioProcessor&, juce::AudioProcessorEditor* ed, OscillatorNumber oscillatorNumber);
 	~OscillatorUI();
 
 	void draw(juce::Graphics& g);
 	void resized(int xOffset, int yOffset, int width, int height);
 
 private:
+	JSynthAudioProcessor& audioProcessor;
+	juce::AudioProcessorEditor* editor;
+
 	OscillatorNumber oscillatorNumber;
 
 	int x;
