@@ -10,7 +10,7 @@ enum class OscillatorNumber {
 	Two = 2,
 };
 
-class OscillatorUI : private juce::ComboBox::Listener {
+class OscillatorUI : private juce::ComboBox::Listener, private juce::Slider::Listener {
 public:
 	OscillatorUI(JSynthAudioProcessor&, juce::AudioProcessorEditor* ed, OscillatorNumber oscillatorNumber);
 	~OscillatorUI();
@@ -35,5 +35,6 @@ private:
 	juce::Slider detuneCentsUI;
 
 	void comboBoxChanged(juce::ComboBox* comboBox) override;
+	void sliderValueChanged(juce::Slider* slider) override;
 };
 
