@@ -78,7 +78,7 @@ public:
 
     juce::AudioParameterChoice* filterType;
     juce::AudioParameterFloat* filterCutoffFrequency;
-    juce::AudioParameterFloat* filterQFactor;
+    juce::AudioParameterFloat* filterResonance;
 
 private:
 

@@ -34,21 +34,21 @@ JSynthAudioProcessor::JSynthAudioProcessor()
     detuneSemitones2 = new juce::AudioParameterInt("detuneSemitones2", "Detune Semitones 2", -36, 36, 0);
     detuneCents2 = new juce::AudioParameterInt("detuneCents2", "Detune Cents 2", -100, 100, 0);
 
-    attack = new juce::AudioParameterFloat("attack", "Attack", 10.0, 4000.0, 10.0);
-    decay = new juce::AudioParameterFloat("decay", "Decay", 10.0, 4000.0, 10.0);
+    attack = new juce::AudioParameterFloat("attack", "Attack", 5.0, 2000.0, 10.0);
+    decay = new juce::AudioParameterFloat("decay", "Decay", 5.0, 2000.0, 10.0);
     sustain = new juce::AudioParameterFloat("sustain", "Sustain", 0.0, 1.0, 0.5);
-    release = new juce::AudioParameterFloat("release", "Release", 10.0, 4000.0, 10.0);
+    release = new juce::AudioParameterFloat("release", "Release", 5.0, 2000.0, 10.0);
 
     pitchBendLimit = new juce::AudioParameterInt("pitchBendLimit", "Pitch Bend Limit", 1, 64, 1);
 
-    lfoFrequency = new juce::AudioParameterFloat("lfoFrequency", "LFO Frequency", 0.0, 1000.0, 0.0);
-    lfoWave = new juce::AudioParameterChoice("lfoWave", "LFO Wave", { "Sine", "Triangle", "Square", "Saw" }, 0);
-    lfoIntensity = new juce::AudioParameterFloat("lfoIntensity", "LFO Intensity", 0.0, 1.0, 0.0);
     lfoRoute = new juce::AudioParameterChoice("lfoRoute", "LFO Route", { "None", "Amplitude", "Frequency"}, 0);
+    lfoWave = new juce::AudioParameterChoice("lfoWave", "LFO Wave", { "Sine", "Triangle", "Square", "Saw" }, 0);
+    lfoFrequency = new juce::AudioParameterFloat("lfoFrequency", "LFO Frequency", 0.0, 1000.0, 0.0);
+    lfoIntensity = new juce::AudioParameterFloat("lfoIntensity", "LFO Intensity", 0.0, 1.0, 0.0);
     
     filterType = new juce::AudioParameterChoice("filterType", "Filter Type", { "None", "High Pass", "Band Pass", "Low Pass" }, 0);
     filterCutoffFrequency = new juce::AudioParameterFloat("filterCutoffFrequency", "Filter Cutoff Frequency", 0.0, 22050.0, 0.0);
-    filterQFactor = new juce::AudioParameterFloat("filterQFactor", "Filter Q Factor", 0.0, 1.0, 1.0);
+    filterResonance = new juce::AudioParameterFloat("filterResonance", "Filter Resonance", 0.0, 1.0, 0.0);
 
 
     addParameter(wave1);
@@ -68,14 +68,14 @@ JSynthAudioProcessor::JSynthAudioProcessor()
 
     addParameter(pitchBendLimit);
 
-    addParameter(lfoFrequency);
-    addParameter(lfoWave);
-    addParameter(lfoIntensity);
     addParameter(lfoRoute);
+    addParameter(lfoWave);
+    addParameter(lfoFrequency);
+    addParameter(lfoIntensity);
 
     addParameter(filterType);
     addParameter(filterCutoffFrequency);
-    addParameter(filterQFactor);
+    addParameter(filterResonance);
 
     processor = new JProcessor(*this);
 }

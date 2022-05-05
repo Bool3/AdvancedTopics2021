@@ -127,7 +127,7 @@ float JProcessor::process() {
 
 	FilterType filterType = (FilterType)audioProcessor.filterType->getIndex();
 	float filterCutoffFrequency = audioProcessor.filterCutoffFrequency->get();
-	float filterQFactor = audioProcessor.filterQFactor->get();
+	float filterQFactor = 1.0 - audioProcessor.filterResonance->get();
 
 	int osc1Detune = detuneCents1 + (detuneSemitones1 * 100);
 	float osc1DetuneMultiplier = centsToMultiplier((float)osc1Detune);

@@ -14,9 +14,9 @@ JSynthAudioProcessorEditor::JSynthAudioProcessorEditor(JSynthAudioProcessor& p)
     : AudioProcessorEditor(&p), audioProcessor(p)
 {
     oscillatorsUI = new OscillatorsUI(p, this);
-    envelopeUI = new EnvelopeUI();
-    filtersUI = new FiltersUI();
-    lfoUI = new LFOUI();
+    envelopeUI = new EnvelopeUI(p, this);
+    filtersUI = new FiltersUI(p, this);
+    lfoUI = new LFOUI(p, this);
 
     setSize(640, 360);
 
@@ -33,7 +33,7 @@ void JSynthAudioProcessorEditor::paint(juce::Graphics& g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll(juce::Colour::fromRGB(240, 240, 240));
 
-    g.setColour(juce::Colour::fromRGB(64, 64, 64));
+    g.setColour(juce::Colour::fromRGB(32, 32, 32));
 
     g.setFont(32);
 

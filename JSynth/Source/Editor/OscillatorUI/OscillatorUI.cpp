@@ -18,6 +18,7 @@ OscillatorUI::OscillatorUI(JSynthAudioProcessor& p, juce::AudioProcessorEditor* 
 
 	editor->addAndMakeVisible(waveUI);
 
+
 	volumeUI.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
 	volumeUI.setRange(0.0, 1.0, 0.01);
 	volumeUI.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
@@ -57,9 +58,6 @@ OscillatorUI::~OscillatorUI() {
 }
 
 void OscillatorUI::draw(juce::Graphics& g) {
-	g.setColour(juce::Colour::fromRGB(255, 0, 255));
-	g.drawRect(x, y, width, height);
-
 	juce::String oscTitle;
 
 	if (oscillatorNumber == OscillatorNumber::One) {
